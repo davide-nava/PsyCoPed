@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # GitHub Actions: one grouped PR per week
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 2
+    assignees:
+      - "aledv"
+      - "davide-nava"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # npm: one grouped PR for minor and patch updates; major versions are handled by hand
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 2
+    assignees:
+      - "aledv"
+      - "davide-nava"
+    commit-message:
+      prefix: "deps"
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # typescript-eslint (used by eslint-plugin-astro) supports TypeScript < 6.1: no TypeScript 7 until it does
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
