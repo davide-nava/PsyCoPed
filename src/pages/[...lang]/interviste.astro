@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { interviews } from '../../data/content';
+import { i18n, getLocaleStaticPaths } from '../../i18n';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const { t, l } = i18n(Astro);
+const v = t.interviews;
+const crumbs = [{ name: v.crumb, href: l('/interviste') }];
+---
+
+<BaseLayout title={v.title} description={v.description} crumbs={crumbs} noindex={interviews.length === 0}>
+  <PageHeader title={v.title} lead={v.lead} crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page max-w-4xl">
+      {interviews.length === 0 ? (
+        <p class="card">{v.empty} <a href={l('/contatti')}>{v.emptyLink}</a>.</p>
+      ) : (
+        <ul class="space-y-5">
+          {interviews.map((i) => (
+            <li class="card"><h2 class="!text-xl">{i.title}</h2>{i.description && <p class="mt-2">{i.description}</p>}{i.url && <a href={i.url} rel="noopener noreferrer" target="_blank">{t.common.openLabel}</a>}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+</BaseLayout>

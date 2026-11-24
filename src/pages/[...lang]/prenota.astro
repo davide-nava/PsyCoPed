@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import BookingWidget from '../../components/BookingWidget.astro';
+import EmergencyNotice from '../../components/EmergencyNotice.astro';
+import { i18n, getLocaleStaticPaths } from '../../i18n';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const { t, l } = i18n(Astro);
+const b = t.book;
+const crumbs = [{ name: b.crumb, href: l('/prenota') }];
+---
+
+<BaseLayout title={b.title} description={b.description} crumbs={crumbs}>
+  <PageHeader title={b.headerTitle} lead={b.lead} crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page max-w-4xl space-y-8">
+      <BookingWidget />
+      <EmergencyNotice />
+      <p>{b.preferTalk} <a href={l('/contatti')}>{t.common.requestInfo}</a>.</p>
+    </div>
+  </section>
+</BaseLayout>

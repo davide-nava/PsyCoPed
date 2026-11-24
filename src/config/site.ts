@@ -1,19 +1,22 @@
+import type { Locale } from '../i18n';
+
 /**
  * Central site configuration. Every value marked VERIFY must be confirmed by the
  * practice before go-live (see README "Pre-launch checklist").
  */
 export const site = {
   name: 'Studio PsyCoPed',
-  tagline: 'Il vostro benessere psicofisico è in buone mani',
   url: 'https://www.studiopsycoped.it', // VERIFY: production domain
-  locale: 'it-IT',
   address: {
     street: 'Via Provinciale, 43',
     postalCode: '21030',
     city: 'Cremenaga',
     province: 'VA',
     country: 'IT',
-    full: 'Via Provinciale, 43 — 21030 Cremenaga (VA), Italia',
+    full: {
+      it: 'Via Provinciale, 43 — 21030 Cremenaga (VA), Italia',
+      en: 'Via Provinciale, 43 — 21030 Cremenaga (VA), Italy',
+    },
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Via+Provinciale+43+21030+Cremenaga+VA',
   },
   contact: {
@@ -53,50 +56,84 @@ export interface Professional {
   email?: string;
   specializations: string[];
   bio: string[];
-  bioEn?: string;
 }
 
-export const professionals: Record<ProfessionalId, Professional> = {
+type LocalizedFields = Pick<Professional, 'name' | 'title' | 'registration' | 'specializations' | 'bio'>;
+
+const professionalBase = {
   provini: {
-    id: 'provini',
-    name: 'Dott. Mirko Provini',
     shortName: 'Mirko Provini',
-    title: 'Psicologo Clinico',
-    registration: 'Iscritto all’Ordine degli Psicologi della Lombardia (OPL), n. 24451',
     phone: '+39 347 521 3108',
     phoneRaw: '+393475213108',
     email: site.contact.email,
-    specializations: ['Neuropsicologia', 'Pedagogia', 'Ipnosi', 'Professional Coaching'],
-    bio: [
-      'Psicologo Clinico (OPL n. 24451), specializzato in Neuropsicologia, Pedagogia, Ipnosi e Professional Coaching.',
-      'È in possesso dell’abilitazione all’insegnamento nella scuola secondaria per Psicologia, Pedagogia e Scienze Umane e collabora a livello editoriale con la testata svizzera TXT-RSI.',
-      'Nella pratica clinica unisce valutazione neuropsicologica, lavoro psicopedagogico e strumenti di ipnosi e coaching, adattando il percorso alla persona e ai suoi obiettivi.',
-    ],
-    bioEn:
-      'Clinical Psychologist (OPL no. 24451), specialised in Neuropsychology, Pedagogy, Hypnosis and Professional Coaching. Qualified to teach Psychology, Pedagogy and Human Sciences in secondary schools, and editorial collaborator with Swiss TXT-RSI.',
   },
   coccia: {
-    id: 'coccia',
-    name: 'Dott.ssa Valentina Coccia',
     shortName: 'Valentina Coccia',
-    title: 'Psicologo Clinico e Pedagogista Clinico',
     // VERIFY: registration number to be provided by the professional
     phone: '+39 348 032 0892',
     phoneRaw: '+393480320892',
-    specializations: ['Psicologia Clinica', 'Pedagogia Clinica'],
-    bio: [
-      'Psicologo Clinico e Pedagogista Clinico, affianca nello Studio PsyCoPed persone e famiglie in percorsi di sostegno psicologico e pedagogico.',
-      'Il suo lavoro integra la prospettiva clinica e quella educativa, con attenzione ai percorsi di crescita, apprendimento e relazione.',
-    ],
+  },
+} as const;
+
+const professionalText: Record<Locale, Record<ProfessionalId, LocalizedFields>> = {
+  it: {
+    provini: {
+      name: 'Dott. Mirko Provini',
+      title: 'Psicologo Clinico',
+      registration: 'Iscritto all’Ordine degli Psicologi della Lombardia (OPL), n. 24451',
+      specializations: ['Neuropsicologia', 'Pedagogia', 'Ipnosi', 'Professional Coaching'],
+      bio: [
+        'Psicologo Clinico (OPL n. 24451), specializzato in Neuropsicologia, Pedagogia, Ipnosi e Professional Coaching.',
+        'È in possesso dell’abilitazione all’insegnamento nella scuola secondaria per Psicologia, Pedagogia e Scienze Umane e collabora a livello editoriale con la testata svizzera TXT-RSI.',
+        'Nella pratica clinica unisce valutazione neuropsicologica, lavoro psicopedagogico e strumenti di ipnosi e coaching, adattando il percorso alla persona e ai suoi obiettivi.',
+      ],
+    },
+    coccia: {
+      name: 'Dott.ssa Valentina Coccia',
+      title: 'Psicologo Clinico e Pedagogista Clinico',
+      specializations: ['Psicologia Clinica', 'Pedagogia Clinica'],
+      bio: [
+        'Psicologo Clinico e Pedagogista Clinico, affianca nello Studio PsyCoPed persone e famiglie in percorsi di sostegno psicologico e pedagogico.',
+        'Il suo lavoro integra la prospettiva clinica e quella educativa, con attenzione ai percorsi di crescita, apprendimento e relazione.',
+      ],
+    },
+  },
+  en: {
+    provini: {
+      name: 'Dr. Mirko Provini',
+      title: 'Clinical Psychologist',
+      registration: 'Registered with the Lombardy Order of Psychologists (OPL), no. 24451',
+      specializations: ['Neuropsychology', 'Pedagogy', 'Hypnosis', 'Professional Coaching'],
+      bio: [
+        'Clinical Psychologist (OPL no. 24451), specialised in Neuropsychology, Pedagogy, Hypnosis and Professional Coaching.',
+        'Qualified to teach Psychology, Pedagogy and Human Sciences in secondary schools, and editorial collaborator with the Swiss publication TXT-RSI.',
+        'In clinical practice he combines neuropsychological assessment, psycho-pedagogical work and hypnosis and coaching tools, adapting the path to the person and their goals.',
+      ],
+    },
+    coccia: {
+      name: 'Dr. Valentina Coccia',
+      title: 'Clinical Psychologist and Clinical Pedagogist',
+      specializations: ['Clinical Psychology', 'Clinical Pedagogy'],
+      bio: [
+        'Clinical Psychologist and Clinical Pedagogist, at Studio PsyCoPed she supports individuals and families through psychological and pedagogical support paths.',
+        'Her work integrates the clinical and educational perspectives, with attention to paths of growth, learning and relationships.',
+      ],
+    },
   },
 };
 
+export function getProfessionals(locale: Locale): Record<ProfessionalId, Professional> {
+  const build = (id: ProfessionalId): Professional => ({ id, ...professionalBase[id], ...professionalText[locale][id] });
+  return { provini: build('provini'), coccia: build('coccia') };
+}
+
+/** Navigation entries; labels live in the i18n dictionaries (`nav.<key>`). */
 export const nav = [
-  { href: '/', label: 'Home' },
-  { href: '/chi-sono', label: 'Chi siamo' },
-  { href: '/servizi', label: 'Servizi' },
-  { href: '/come-funziona', label: 'Come funziona' },
-  { href: '/pubblicazioni', label: 'Pubblicazioni' },
-  { href: '/vocal-coach', label: 'Vocal Coach' },
-  { href: '/contatti', label: 'Contatti' },
+  { href: '/', key: 'home' },
+  { href: '/chi-sono', key: 'about' },
+  { href: '/servizi', key: 'services' },
+  { href: '/come-funziona', key: 'how' },
+  { href: '/pubblicazioni', key: 'publications' },
+  { href: '/vocal-coach', key: 'vocal' },
+  { href: '/contatti', key: 'contact' },
 ] as const;

@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import DraftBanner from '../../components/DraftBanner.astro';
+import { i18n, getLocaleStaticPaths } from '../../i18n';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const { locale, t, l } = i18n(Astro);
+const p = t.legalPages;
+const crumbs = [{ name: p.cookieTitle, href: l('/cookie') }];
+---
+
+<BaseLayout title={p.cookieTitle} description={p.cookieDescription} crumbs={crumbs}>
+  <PageHeader title={p.cookieTitle} lead={p.cookieLead} crumbs={crumbs} />
+  <section class="section"><div class="container-page">
+    <DraftBanner />
+    <div class="prose-clinic">
+      {locale === 'it' ? (
+        <>
+          <h2>Cosa sono i cookie</h2>
+          <p>I cookie sono piccoli file di testo (o tecnologie analoghe, come il localStorage) memorizzati sul dispositivo per far funzionare il sito o raccogliere informazioni.</p>
+          <h2>Categorie</h2>
+          <ul>
+            <li><strong>Necessari:</strong> indispensabili al funzionamento; non richiedono consenso.</li>
+            <li><strong>Statistiche:</strong> misurazione delle visite; attivi solo con consenso.</li>
+            <li><strong>Contenuti di terze parti:</strong> servizi esterni che possono impostare propri cookie; attivi solo con consenso.</li>
+          </ul>
+          <p>Il sito non usa font o script esterni per default e non utilizza cookie di profilazione.</p>
+        </>
+      ) : (
+        <>
+          <h2>What cookies are</h2>
+          <p>Cookies are small text files (or similar technologies, such as localStorage) stored on your device to make the site work or to collect information.</p>
+          <h2>Categories</h2>
+          <ul>
+            <li><strong>Necessary:</strong> essential for the site to work; they do not require consent.</li>
+            <li><strong>Statistics:</strong> measurement of visits; active only with consent.</li>
+            <li><strong>Third-party content:</strong> external services that may set their own cookies; active only with consent.</li>
+          </ul>
+          <p>By default the site does not use external fonts or scripts and does not use profiling cookies.</p>
+        </>
+      )}
+    </div>
+    <div class="my-8 overflow-x-auto">
+      <table class="w-full min-w-[36rem] border border-line bg-white text-left text-base">
+        <caption class="p-3 text-left font-semibold">{p.cookieTableCaption}</caption>
+        <thead class="bg-sage-100"><tr>{p.cookieCols.map((c) => <th scope="col" class="p-3">{c}</th>)}</tr></thead>
+        <tbody>{p.cookieRows.map((r) => <tr class="border-t border-line">{r.map((c, i) => i === 0 ? <th scope="row" class="p-3 font-medium">{c}</th> : <td class="p-3">{c}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+    <div class="prose-clinic">
+      {locale === 'it' ? (
+        <>
+          <h2>Gestisci le preferenze</h2>
+          <p>Puoi modificare o revocare il consenso in qualsiasi momento.</p>
+        </>
+      ) : (
+        <>
+          <h2>Manage your preferences</h2>
+          <p>You can change or withdraw your consent at any time.</p>
+        </>
+      )}
+      <button type="button" class="btn btn-primary" data-open-cookie-settings>{p.cookieOpenPrefs}</button>
+      {locale === 'it' ? (
+        <p>Puoi inoltre gestire i cookie dalle impostazioni del browser. Titolare del trattamento e diritti: vedi l’<a href={l('/privacy')}>Informativa Privacy</a>.</p>
+      ) : (
+        <p>You can also manage cookies from your browser settings. For the data controller and your rights, see the <a href={l('/privacy')}>Privacy Policy</a>.</p>
+      )}
+    </div>
+  </div></section>
+</BaseLayout>

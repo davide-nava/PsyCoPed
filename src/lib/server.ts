@@ -3,6 +3,8 @@
  * Uses only Web-standard Request/Response, so it runs unchanged on Cloudflare
  * Pages Functions, Netlify (edge), Vercel (edge) or Astro API routes.
  */
+import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import { validateBooking, validateContact, type BookingPayload, type ContactPayload } from './validation';
 
 const json = (data: unknown, status = 200) =>
@@ -38,7 +40,11 @@ export async function handleSubmission(request: Request, kind: Kind, env: Record
 
   if (typeof body.website === 'string' && body.website) return json({ ok: true }); // honeypot: silently drop
 
-  const errors = kind === 'contact' ? validateContact(body as Partial<ContactPayload>) : validateBooking(body as Partial<BookingPayload>);
+  const messages = (body.locale === 'en' ? en : it).validation;
+  const errors =
+    kind === 'contact'
+      ? validateContact(body as Partial<ContactPayload>, messages)
+      : validateBooking(body as Partial<BookingPayload>, messages);
   if (Object.keys(errors).length) return json({ ok: false, errors }, 422);
 
   try {

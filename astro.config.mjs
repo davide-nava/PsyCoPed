@@ -12,8 +12,12 @@ export default defineConfig({
   integrations: [
     sitemap({
       filter: (page) => !page.includes('/404') && !page.endsWith('/interviste'), // thin until populated
+      // Adds <xhtml:link rel="alternate" hreflang> entries linking each page to its translation.
+      // Routing itself lives in src/pages/[...lang] and src/i18n (Italian at "/", English at "/en").
+      i18n: { defaultLocale: 'it', locales: { it: 'it-IT', en: 'en-GB' } },
       serialize(item) {
-        const p = new URL(item.url).pathname;
+        // Locale-less path, so the same priorities apply to both languages.
+        const p = new URL(item.url).pathname.replace(/^\/en(?=\/|$)/, '') || '/';
         item.lastmod = new Date().toISOString();
         item.changefreq = 'monthly';
         item.priority = p === '/' ? 1.0 : p === '/prenota' || p === '/servizi' || p.startsWith('/servizi/') ? 0.9 : ['/privacy', '/cookie', '/note-legali'].includes(p) ? 0.2 : 0.7;

@@ -1,83 +1,89 @@
 ---
 import { site } from '../config/site';
-import { services } from '../data/services';
+import { getServices } from '../data/services';
+import { i18n } from '../i18n';
 
 interface Props { presetSubject?: string }
 const { presetSubject = '' } = Astro.props;
-const subjects = [...services.map((s) => s.title), 'Informazioni generali'];
+const { locale, t, l } = i18n(Astro);
+const f = t.contactForm;
+const subjects = [...getServices(locale).map((s) => s.title), f.subjectGeneral];
+const channels = Object.entries(f.channels) as [string, string][];
+// Strings needed by the client-side script.
+const clientT = { locale, validation: t.validation, form: f };
 ---
 
 <form id="contact-form" novalidate class="space-y-5" data-endpoint={site.endpoints.contact}
-  data-email={site.contact.email}>
+  data-email={site.contact.email} data-t={JSON.stringify(clientT)}>
   <div id="contact-summary" role="alert" tabindex="-1" hidden class="rounded-xl border-2 border-alert bg-alert-bg p-4 text-alert"></div>
 
   <div class="grid gap-5 sm:grid-cols-2">
     <div class="field">
-      <label for="c-name">Nome e cognome <span aria-hidden="true">*</span></label>
+      <label for="c-name">{f.name} <span aria-hidden="true">*</span></label>
       <input id="c-name" name="name" class="input" autocomplete="name" required aria-describedby="c-name-err" />
       <p id="c-name-err" class="field-error" hidden></p>
     </div>
     <div class="field">
-      <label for="c-email">Email <span aria-hidden="true">*</span></label>
+      <label for="c-email">{f.email} <span aria-hidden="true">*</span></label>
       <input id="c-email" name="email" type="email" class="input" autocomplete="email" required aria-describedby="c-email-err" />
       <p id="c-email-err" class="field-error" hidden></p>
     </div>
     <div class="field">
-      <label for="c-phone">Telefono</label>
+      <label for="c-phone">{f.phone}</label>
       <input id="c-phone" name="phone" type="tel" class="input" autocomplete="tel" aria-describedby="c-phone-hint c-phone-err" />
-      <p id="c-phone-hint" class="hint">Obbligatorio se scegli telefono, WhatsApp o Telegram.</p>
+      <p id="c-phone-hint" class="hint">{f.phoneHint}</p>
       <p id="c-phone-err" class="field-error" hidden></p>
     </div>
     <div class="field">
-      <label for="c-window">Fascia oraria preferita per essere richiamato</label>
+      <label for="c-window">{f.window}</label>
       <select id="c-window" name="callbackWindow" class="input">
-        <option value="">Nessuna preferenza</option>
-        <option>Mattina (9–13)</option>
-        <option>Pomeriggio (14–19)</option>
+        <option value="">{f.windowNone}</option>
+        <option>{f.windowMorning}</option>
+        <option>{f.windowAfternoon}</option>
       </select>
     </div>
   </div>
 
   <div class="field">
-    <label for="c-subject">Servizio di interesse <span aria-hidden="true">*</span></label>
+    <label for="c-subject">{f.subject} <span aria-hidden="true">*</span></label>
     <select id="c-subject" name="subject" class="input" required aria-describedby="c-subject-err">
-      <option value="">Seleziona…</option>
+      <option value="">{f.subjectPlaceholder}</option>
       {subjects.map((s) => <option selected={s === presetSubject}>{s}</option>)}
     </select>
     <p id="c-subject-err" class="field-error" hidden></p>
   </div>
 
   <fieldset aria-describedby="c-channel-err">
-    <legend class="label">Come preferisci essere contattato/a? <span aria-hidden="true">*</span></legend>
+    <legend class="label">{f.channelLegend} <span aria-hidden="true">*</span></legend>
     <div class="flex flex-wrap gap-x-6 gap-y-2">
-      {[['phone', 'Telefono'], ['email', 'Email'], ['whatsapp', 'WhatsApp'], ['telegram', 'Telegram']].map(([v, l], i) => (
-        <label class="flex min-h-11 items-center gap-2"><input type="radio" name="channel" value={v} class="h-5 w-5" checked={i === 1} /> {l}</label>
+      {channels.map(([v, label], i) => (
+        <label class="flex min-h-11 items-center gap-2"><input type="radio" name="channel" value={v} class="h-5 w-5" checked={i === 1} /> {label}</label>
       ))}
     </div>
     <p id="c-channel-err" class="field-error" hidden></p>
   </fieldset>
 
   <div class="field">
-    <label for="c-message">Messaggio <span aria-hidden="true">*</span></label>
+    <label for="c-message">{f.message} <span aria-hidden="true">*</span></label>
     <textarea id="c-message" name="message" rows="5" maxlength="2000" class="input" required aria-describedby="c-message-hint c-message-err"></textarea>
-    <p id="c-message-hint" class="hint">Descrivi brevemente la tua richiesta. Evita di inserire dati sanitari dettagliati: ne parleremo in colloquio.</p>
+    <p id="c-message-hint" class="hint">{f.messageHint}</p>
     <p id="c-message-err" class="field-error" hidden></p>
   </div>
 
   <!-- Honeypot: hidden from people and assistive tech -->
-  <div aria-hidden="true" style="position:absolute;left:-9999px"><label>Sito web <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+  <div aria-hidden="true" style="position:absolute;left:-9999px"><label>{f.honeypot} <input name="website" tabindex="-1" autocomplete="off" /></label></div>
 
   <div class="field">
     <label class="flex items-start gap-3 !font-normal">
       <input type="checkbox" name="consent" class="mt-1.5 h-5 w-5" required aria-describedby="c-consent-err" />
-      <span>Ho letto l’<a href="/privacy" target="_blank">Informativa Privacy</a> e acconsento al trattamento dei miei dati per rispondere alla richiesta. <span aria-hidden="true">*</span></span>
+      <span>{f.consentBefore}<a href={l('/privacy')} target="_blank">{f.consentLink}</a> {f.consentAfter} <span aria-hidden="true">*</span></span>
     </label>
     <p id="c-consent-err" class="field-error" hidden></p>
   </div>
 
   <div class="flex flex-wrap items-center gap-4">
-    <button type="submit" class="btn btn-primary">Invia richiesta</button>
-    <p class="hint !mt-0">* campi obbligatori</p>
+    <button type="submit" class="btn btn-primary">{f.submit}</button>
+    <p class="hint !mt-0">{t.common.required}</p>
   </div>
 
   <div id="contact-status" role="status" aria-live="polite" tabindex="-1" hidden class="rounded-xl border border-teal-600 bg-sage-100 p-4"></div>
@@ -87,11 +93,16 @@ const subjects = [...services.map((s) => s.title), 'Informazioni generali'];
   import { validateContact, type ContactPayload } from '../lib/validation';
   import { postJson, mailtoHref } from '../lib/submit';
   import { site } from '../config/site';
+  import type { Dict } from '../i18n/it';
 
   const form = document.getElementById('contact-form') as HTMLFormElement;
   const summary = document.getElementById('contact-summary') as HTMLElement;
   const status = document.getElementById('contact-status') as HTMLElement;
+  const T: { locale: string; validation: Dict['validation']; form: Dict['contactForm'] } = JSON.parse(form.dataset.t!);
   const idFor: Record<string, string> = { name: 'c-name', email: 'c-email', phone: 'c-phone', subject: 'c-subject', message: 'c-message', consent: 'c-consent', channel: 'c-channel' };
+
+  /** Escape text before it is placed in an innerHTML template. */
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
   const read = (): ContactPayload => {
     const d = new FormData(form);
@@ -99,7 +110,7 @@ const subjects = [...services.map((s) => s.title), 'Informazioni generali'];
       name: String(d.get('name') || ''), email: String(d.get('email') || ''), phone: String(d.get('phone') || ''),
       callbackWindow: String(d.get('callbackWindow') || ''), subject: String(d.get('subject') || ''),
       channel: String(d.get('channel') || '') as ContactPayload['channel'], message: String(d.get('message') || ''),
-      consent: d.get('consent') === 'on', website: String(d.get('website') || ''),
+      consent: d.get('consent') === 'on', website: String(d.get('website') || ''), locale: T.locale,
     };
   };
 
@@ -113,8 +124,8 @@ const subjects = [...services.map((s) => s.title), 'Informazioni generali'];
       if (err) { err.textContent = errors[k]!; err.hidden = false; }
       form.querySelector(`[name="${k}"]`)?.setAttribute('aria-invalid', 'true');
     }
-    summary.innerHTML = `<p class="font-semibold">Controlla i campi evidenziati:</p><ul class="mt-1 list-disc pl-5">${keys
-      .map((k) => `<li><a class="text-alert" href="#${idFor[k] === 'c-consent' || idFor[k] === 'c-channel' ? idFor[k] + '-err' : idFor[k]}">${errors[k]}</a></li>`).join('')}</ul>`;
+    summary.innerHTML = `<p class="font-semibold">${esc(T.form.fixFields)}</p><ul class="mt-1 list-disc pl-5">${keys
+      .map((k) => `<li><a class="text-alert" href="#${idFor[k] === 'c-consent' || idFor[k] === 'c-channel' ? idFor[k] + '-err' : idFor[k]}">${esc(errors[k]!)}</a></li>`).join('')}</ul>`;
     summary.hidden = false;
     summary.focus();
     return true;
@@ -124,21 +135,21 @@ const subjects = [...services.map((s) => s.title), 'Informazioni generali'];
     e.preventDefault();
     status.hidden = true;
     const payload = read();
-    if (showErrors(validateContact(payload))) return;
+    if (showErrors(validateContact(payload, T.validation))) return;
     if (payload.website) return; // bot
     const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
-    btn.disabled = true; btn.textContent = 'Invio in corso…';
+    btn.disabled = true; btn.textContent = T.form.sending;
     const res = await postJson(form.dataset.endpoint!, payload);
-    btn.disabled = false; btn.textContent = 'Invia richiesta';
+    btn.disabled = false; btn.textContent = T.form.submit;
     status.hidden = false;
     if (res.ok) {
-      status.innerHTML = '<p class="font-semibold">Grazie, richiesta inviata.</p><p>Ti risponderemo appena possibile. Questo modulo non è monitorato in tempo reale: in caso di emergenza chiama il 112.</p>';
+      status.innerHTML = `<p class="font-semibold">${esc(T.form.okTitle)}</p><p>${esc(T.form.okText)}</p>`;
       form.reset();
     } else {
-      const body = `Nome: ${payload.name}\nTelefono: ${payload.phone}\nCanale preferito: ${payload.channel}\n\n${payload.message}`;
-      status.innerHTML = `<p class="font-semibold">Non è stato possibile inviare la richiesta online.</p>
-        <p>Puoi contattarci direttamente: <a href="${mailtoHref(site.contact.email, 'Richiesta informazioni: ' + payload.subject, body)}">invia email</a>,
-        scrivi alla PEC <a href="mailto:${site.contact.pec}">${site.contact.pec}</a> oppure chiama <a href="tel:${site.contact.phoneRaw}">${site.contact.phone}</a>.</p>`;
+      const body = `${T.form.mailName}: ${payload.name}\n${T.form.mailPhone}: ${payload.phone}\n${T.form.mailChannel}: ${payload.channel}\n\n${payload.message}`;
+      status.innerHTML = `<p class="font-semibold">${esc(T.form.failTitle)}</p>
+        <p>${esc(T.form.failBefore)} <a href="${mailtoHref(site.contact.email, T.form.mailSubject + ' ' + payload.subject, body)}">${esc(T.form.failEmail)}</a>${esc(T.form.failAfterEmail)}
+        <a href="mailto:${site.contact.pec}">${site.contact.pec}</a> ${esc(T.form.failOr)} <a href="tel:${site.contact.phoneRaw}">${site.contact.phone}</a>.</p>`;
     }
     status.focus();
   });

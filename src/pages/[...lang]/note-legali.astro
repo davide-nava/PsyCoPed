@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import DraftBanner from '../../components/DraftBanner.astro';
+import { site, getProfessionals } from '../../config/site';
+import { i18n, getLocaleStaticPaths } from '../../i18n';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const { locale, t, l } = i18n(Astro);
+const p = t.legalPages;
+const professionals = getProfessionals(locale);
+const crumbs = [{ name: p.legalCrumb, href: l('/note-legali') }];
+---
+
+<BaseLayout title={p.legalTitle} description={p.legalDescription} crumbs={crumbs}>
+  <PageHeader title={p.legalTitle} crumbs={crumbs} />
+  <section class="section"><div class="container-page">
+    <DraftBanner />
+    <div class="prose-clinic">
+      {locale === 'it' ? (
+        <>
+          <h2>Titolare del sito</h2>
+          <p>{site.name} — {site.address.full.it}.<br />Partita IVA: {site.admin.vatNumber}<br />Codice fiscale: {site.admin.fiscalCode}<br />Email: {site.contact.email} — PEC: {site.contact.pec}</p>
+          <h2>Professionisti</h2>
+          <ul>
+            <li>{professionals.provini.name}, {professionals.provini.title}. {professionals.provini.registration}.</li>
+            <li>{professionals.coccia.name}, {professionals.coccia.title}. Iscrizione all’Albo: <em>da completare</em>.</li>
+          </ul>
+          <p>I professionisti esercitano nel rispetto del Codice Deontologico degli Psicologi Italiani. Polizza assicurativa di responsabilità civile professionale: <em>da completare</em>.</p>
+          <h2>Natura informativa del sito</h2>
+          <p>I contenuti hanno finalità esclusivamente informativa e non sostituiscono visita, diagnosi o trattamento. Il sito e i moduli di contatto non sono un servizio di emergenza: in caso di pericolo immediato chiama il 112.</p>
+          <h2>Tariffe e onorari</h2>
+          <p>Le tariffe sono comunicate prima dell’inizio del percorso. <em>Inserire il tariffario o rimandare al preventivo.</em></p>
+          <h2>Proprietà intellettuale</h2>
+          <p>Testi, immagini e marchi sono di proprietà dei rispettivi titolari; ne è vietata la riproduzione non autorizzata. Le citazioni (es. Alfred Adler) sono riportate a scopo illustrativo.</p>
+          <h2>Collegamenti esterni e responsabilità</h2>
+          <p>Lo studio non è responsabile dei contenuti di siti terzi raggiungibili tramite link.</p>
+          <h2>Legge applicabile</h2>
+          <p>Legge italiana. Foro competente secondo le norme di legge.</p>
+          <p><a href={l('/privacy')}>Privacy Policy</a> · <a href={l('/cookie')}>Cookie Policy</a></p>
+        </>
+      ) : (
+        <>
+          <h2>Website owner</h2>
+          <p>{site.name} — {site.address.full.en}.<br />VAT number (Partita IVA): {site.admin.vatNumber}<br />Tax code (Codice fiscale): {site.admin.fiscalCode}<br />Email: {site.contact.email} — PEC: {site.contact.pec}</p>
+          <h2>Professionals</h2>
+          <ul>
+            <li>{professionals.provini.name}, {professionals.provini.title}. {professionals.provini.registration}.</li>
+            <li>{professionals.coccia.name}, {professionals.coccia.title}. Professional register enrolment: <em>to be completed</em>.</li>
+          </ul>
+          <p>The professionals practise in compliance with the Code of Ethics of Italian Psychologists. Professional liability insurance policy: <em>to be completed</em>.</p>
+          <h2>Informational nature of the site</h2>
+          <p>The content is for information purposes only and does not replace a visit, diagnosis or treatment. The site and the contact forms are not an emergency service: in case of immediate danger call 112.</p>
+          <h2>Fees</h2>
+          <p>Fees are communicated before the start of the path. <em>Insert the fee schedule or refer to a quotation.</em></p>
+          <h2>Intellectual property</h2>
+          <p>Texts, images and trademarks are the property of their respective owners; unauthorised reproduction is prohibited. Quotations (e.g. Alfred Adler) are reported for illustrative purposes.</p>
+          <h2>External links and liability</h2>
+          <p>The studio is not responsible for the content of third-party sites reachable through links.</p>
+          <h2>Applicable law</h2>
+          <p>Italian law. Competent court according to the rules of law.</p>
+          <p><a href={l('/privacy')}>Privacy Policy</a> · <a href={l('/cookie')}>Cookie Policy</a></p>
+        </>
+      )}
+    </div>
+  </div></section>
+</BaseLayout>

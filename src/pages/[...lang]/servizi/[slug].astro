@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import { getServices, serviceSlugs } from '../../../data/services';
+import { serviceSchema } from '../../../lib/schema';
+import { i18n, locales, defaultLocale } from '../../../i18n';
+
+export function getStaticPaths() {
+  return locales.flatMap((locale) =>
+    serviceSlugs.map((slug) => ({ params: { lang: locale === defaultLocale ? undefined : locale, slug } })),
+  );
+}
+
+const { locale, t, l } = i18n(Astro);
+const service = getServices(locale).find((s) => s.slug === Astro.params.slug)!;
+const { seo } = service;
+const crumbs = [
+  { name: t.services.crumb, href: l('/servizi') },
+  { name: service.title, href: l(`/servizi/${service.slug}`) },
+];
+---
+
+<BaseLayout title={seo.title} description={seo.description} crumbs={crumbs} schemas={[serviceSchema({ title: service.title, description: seo.description, slug: service.slug }, locale)]}>
+  <PageHeader title={service.title} lead={service.intro} crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1fr_20rem]">
+      <div class="prose-clinic">
+        {service.sections.map((s) => (
+          <>
+            <h2>{s.heading}</h2>
+            {s.paragraphs?.map((p) => <p>{p}</p>)}
+            {s.items && (s.ordered ? <ol>{s.items.map((i) => <li>{i}</li>)}</ol> : <ul>{s.items.map((i) => <li>{i}</li>)}</ul>)}
+          </>
+        ))}
+        <h2>{t.services.firstSessionTitle}</h2>
+        <p>{service.firstSession}</p>
+      </div>
+      <aside class="card h-fit bg-sage-100 lg:sticky lg:top-24">
+        <h2 class="!text-xl">{t.services.asideTitle}</h2>
+        <p class="mt-2 text-sm">{t.services.asideText}</p>
+        <a class="btn btn-primary mt-4 w-full" href={l(`/prenota?servizio=${service.bookingId}`)}>{t.common.bookSession}</a>
+        <a class="btn btn-secondary mt-3 w-full" href={l(`/contatti?servizio=${encodeURIComponent(service.title)}`)}>{t.common.requestInfo}</a>
+        <p class="mt-4 text-sm"><a href={l('/servizi')}>{t.services.allServices}</a></p>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

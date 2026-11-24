@@ -35,7 +35,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci --ignore-scripts
 
-      # --- Step di verifica Parità i18n (IT / EN / FR / DE) ---
+      # --- Step di verifica Parità i18n (IT / EN) ---
       - name: Verify i18n Keys Parity
         run: npm run test:i18n
 

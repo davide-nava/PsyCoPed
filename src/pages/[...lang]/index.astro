@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import FaqList from '../../components/FaqList.astro';
+import ContactBlock from '../../components/ContactBlock.astro';
+import EmergencyNotice from '../../components/EmergencyNotice.astro';
+import { getServices } from '../../data/services';
+import { getFaqs } from '../../data/faq';
+import { faqSchema } from '../../lib/schema';
+import { i18n, getLocaleStaticPaths } from '../../i18n';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const { locale, t, l } = i18n(Astro);
+const h = t.home;
+const services = getServices(locale);
+const preview = getFaqs(locale).slice(0, 4);
+---
+
+<BaseLayout title={h.title} rawTitle description={h.description} schemas={[faqSchema(preview)]}>
+
+  <section class="bg-gradient-to-b from-sage-100 to-surface">
+    <div class="container-page grid items-center gap-10 py-16 md:grid-cols-[1.3fr_1fr] md:py-24">
+      <div>
+        <p class="eyebrow">{h.eyebrow}</p>
+        <h1>{h.h1}</h1>
+        <p class="mt-5 max-w-2xl text-lg text-slate-700">{h.lead}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a class="btn btn-primary" href={l('/prenota')}>{t.common.bookSession}</a>
+          <a class="btn btn-secondary" href={l('/contatti')}>{t.common.requestInfo}</a>
+        </div>
+      </div>
+      <figure class="card bg-white">
+        <blockquote class="font-serif text-2xl leading-snug text-navy-900">{h.quote}</blockquote>
+        <figcaption class="mt-4 font-semibold text-teal-700">{h.quoteAuthor}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section aria-label={h.trustLabel} class="border-y border-line bg-white">
+    <ul class="container-page grid gap-6 py-8 sm:grid-cols-2 lg:grid-cols-4">
+      {h.trust.map(([title, desc]) => (
+        <li><p class="font-semibold text-navy-900">{title}</p><p class="text-sm text-slate-600">{desc}</p></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="section">
+    <div class="container-page grid gap-10 md:grid-cols-2">
+      <div>
+        <p class="eyebrow">{h.therapyEyebrow}</p>
+        <h2>{h.therapyTitle}</h2>
+      </div>
+      <div class="prose-clinic">
+        {locale === 'it' ? (
+          <>
+            <p>La terapia non è una pillola magica né una soluzione istantanea. È un processo di cura che richiede <strong>tempo</strong> e la <strong>partecipazione attiva</strong> di entrambi: del paziente e del terapeuta.</p>
+            <p>Piccoli cambiamenti nei comportamenti autodistruttivi e il superamento del senso di inferiorità — tristezza, paura, dolore — possono portare a risultati che cambiano la vita.</p>
+          </>
+        ) : (
+          <>
+            <p>Therapy is not a magic pill or an instant solution. It is a healing process that takes <strong>time</strong> and the <strong>active participation</strong> of both: the patient and the therapist.</p>
+            <p>Small changes in self-destructive behaviours and overcoming the sense of inferiority — sadness, fear, pain — can lead to life-changing results.</p>
+          </>
+        )}
+        <p><a href={l('/come-funziona')}>{h.therapyDiscover}</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-white" aria-labelledby="local-title">
+    <div class="container-page prose-clinic">
+      <h2 id="local-title">{h.localTitle}</h2>
+      {locale === 'it' ? (
+        <>
+          <p>Lo Studio PsyCoPed si trova in Via Provinciale 43 a Cremenaga (VA) e offre <a href={l('/servizi/consulenza-psicologica')}>consulenza psicologica</a>, <a href={l('/servizi/neuropsicologia')}>valutazione neuropsicologica</a>, <a href={l('/servizi/consulenza-pedagogica')}>consulenza pedagogica e DSA</a>, <a href={l('/servizi/ipnosi')}>ipnosi</a> e <a href={l('/servizi/professional-coaching')}>professional coaching</a>.</p>
+          <p>Gli incontri si svolgono in studio oppure in videoconsulenza, con il Dott. Mirko Provini e la Dott.ssa Valentina Coccia. <a href={l('/chi-sono')}>Conosci l’équipe</a>.</p>
+        </>
+      ) : (
+        <>
+          <p>Studio PsyCoPed is located at Via Provinciale 43 in Cremenaga (VA), Italy, and offers <a href={l('/servizi/consulenza-psicologica')}>psychological counselling</a>, <a href={l('/servizi/neuropsicologia')}>neuropsychological assessment</a>, <a href={l('/servizi/consulenza-pedagogica')}>pedagogical counselling and learning disorders</a>, <a href={l('/servizi/ipnosi')}>hypnosis</a> and <a href={l('/servizi/professional-coaching')}>professional coaching</a>.</p>
+          <p>Sessions take place in the studio or by video consultation, with Dr. Mirko Provini and Dr. Valentina Coccia. <a href={l('/chi-sono')}>Meet the team</a>.</p>
+        </>
+      )}
+    </div>
+  </section>
+
+  <section class="section bg-sage-100" aria-labelledby="services-title">
+    <div class="container-page">
+      <p class="eyebrow">{h.servicesEyebrow}</p>
+      <h2 id="services-title">{h.servicesTitle}</h2>
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {services.map((s) => <ServiceCard service={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div><p class="eyebrow">{h.faqEyebrow}</p><h2>{h.faqTitle}</h2></div>
+        <a href={l('/come-funziona')}>{h.faqAll}</a>
+      </div>
+      <FaqList items={preview} />
+      <div class="mt-8"><EmergencyNotice /></div>
+    </div>
+  </section>
+
+  <ContactBlock />
+</BaseLayout>

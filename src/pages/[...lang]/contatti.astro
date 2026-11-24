@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import EmergencyNotice from '../../components/EmergencyNotice.astro';
+import { site, getProfessionals } from '../../config/site';
+import { i18n, getLocaleStaticPaths } from '../../i18n';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const { locale, t, l } = i18n(Astro);
+const c = t.contact;
+const professionals = getProfessionals(locale);
+const crumbs = [{ name: c.crumb, href: l('/contatti') }];
+---
+
+<BaseLayout title={c.title} pageType="ContactPage" description={c.description} crumbs={crumbs}>
+  <PageHeader title={c.headerTitle} lead={c.lead} crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1.4fr_1fr]">
+      <div>
+        <h2 class="mb-6 !text-3xl">{c.formTitle}</h2>
+        <ContactForm />
+      </div>
+      <div class="space-y-6">
+        <EmergencyNotice />
+        <div class="card">
+          <h2 class="!text-2xl">{c.directTitle}</h2>
+          <address class="mt-4 space-y-2 not-italic">
+            <p>{site.address.full[locale]}</p>
+            <p>{professionals.provini.name}<br /><a href={`tel:${professionals.provini.phoneRaw}`}>{professionals.provini.phone}</a> {t.common.phoneAlsoMessaging}</p>
+            <p>{professionals.coccia.name}<br /><a href={`tel:${professionals.coccia.phoneRaw}`}>{professionals.coccia.phone}</a></p>
+            <p>{t.common.email}: <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></p>
+            <p>PEC: <a href={`mailto:${site.contact.pec}`}>{site.contact.pec}</a></p>
+          </address>
+          <p class="mt-4"><a href={site.address.mapsUrl} target="_blank" rel="noopener noreferrer">{t.common.openMaps}<span class="sr-only">{t.common.newTabShort}</span></a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Preselect the service from ?servizio= (matches the localized service title)
+  const wanted = new URLSearchParams(location.search).get('servizio');
+  const select = document.getElementById('c-subject') as HTMLSelectElement | null;
+  if (wanted && select) {
+    const opt = [...select.options].find((o) => o.value === wanted);
+    if (opt) select.value = opt.value;
+  }
+</script>

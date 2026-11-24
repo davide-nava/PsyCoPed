@@ -1,32 +1,36 @@
-import { site, professionals } from '../config/site';
+import { site, getProfessionals } from '../config/site';
 import type { FaqItem } from '../data/faq';
+import { bcp47, getDict, localePath, type Locale } from '../i18n';
 
-const id = (path: string) => `${site.url}${path}`;
+const abs = (path: string) => `${site.url}${path}`;
+/** Absolute URL of a localized path. */
+const id = (locale: Locale, path: string) => abs(localePath(locale, path) === '/' ? '' : localePath(locale, path));
+/** Language-independent entity id (the practice is one entity across locales). */
+const practiceId = abs('/#practice');
 
-export const personSchema = (key: 'provini' | 'coccia') => {
-  const p = professionals[key];
+export const personSchema = (key: 'provini' | 'coccia', locale: Locale) => {
+  const p = getProfessionals(locale)[key];
   return {
     '@type': 'Person',
-    '@id': id(`/chi-sono#${key}`),
+    '@id': `${id(locale, '/chi-sono')}#${key}`,
     name: p.name,
     jobTitle: p.title,
     telephone: p.phoneRaw,
     ...(p.email ? { email: p.email } : {}),
     knowsAbout: p.specializations,
-    worksFor: { '@id': id('/#practice') },
+    worksFor: { '@id': practiceId },
   };
 };
 
-export const practiceSchema = () => ({
+export const practiceSchema = (locale: Locale) => ({
   '@context': 'https://schema.org',
   '@type': ['MedicalBusiness', 'Psychologist'],
-  '@id': id('/#practice'),
+  '@id': practiceId,
   name: site.name,
   url: site.url,
-  image: id('/og-image.png'),
-  logo: id('/favicon.svg'),
-  description:
-    'Studio di psicologia clinica, neuropsicologia, pedagogia, ipnosi e professional coaching a Cremenaga (VA). Consulenze in studio e online.',
+  image: abs('/og-image.png'),
+  logo: abs('/favicon.svg'),
+  description: getDict(locale).meta.practiceDescription,
   telephone: site.contact.phoneRaw,
   email: site.contact.email,
   address: {
@@ -44,7 +48,7 @@ export const practiceSchema = () => ({
     closes: h.closes,
   })),
   availableLanguage: ['it', 'en'],
-  employee: [personSchema('provini'), personSchema('coccia')],
+  employee: [personSchema('provini', locale), personSchema('coccia', locale)],
 });
 
 export const faqSchema = (items: FaqItem[]) => ({
@@ -64,43 +68,47 @@ export const breadcrumbSchema = (crumbs: { name: string; href: string }[]) => ({
     '@type': 'ListItem',
     position: i + 1,
     name: c.name,
-    item: id(c.href === '/' ? '' : c.href),
+    // Crumb hrefs are already localized by the pages.
+    item: abs(c.href === '/' ? '' : c.href),
   })),
 });
 
-export const websiteSchema = () => ({
+export const websiteSchema = (locale: Locale) => ({
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  '@id': id('/#website'),
-  url: site.url,
+  '@id': `${id(locale, '/')}#website`,
+  url: id(locale, '/'),
   name: site.name,
-  inLanguage: 'it-IT',
-  publisher: { '@id': id('/#practice') },
+  inLanguage: bcp47[locale],
+  publisher: { '@id': practiceId },
 });
 
-export const webPageSchema = (p: { type: string; url: string; name: string; description: string }) => ({
+export const webPageSchema = (p: { type: string; url: string; name: string; description: string; locale: Locale }) => ({
   '@context': 'https://schema.org',
   '@type': p.type,
   '@id': `${p.url}#webpage`,
   url: p.url,
   name: p.name,
   description: p.description,
-  inLanguage: 'it-IT',
-  isPartOf: { '@id': id('/#website') },
-  about: { '@id': id('/#practice') },
+  inLanguage: bcp47[p.locale],
+  isPartOf: { '@id': `${id(p.locale, '/')}#website` },
+  about: { '@id': practiceId },
 });
 
-export const serviceSchema = (s: { title: string; description: string; slug: string }) => ({
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: s.title,
-  description: s.description,
-  url: id(`/servizi/${s.slug}`),
-  serviceType: s.title,
-  provider: { '@id': id('/#practice') },
-  areaServed: [
-    { '@type': 'Place', name: 'Cremenaga (VA)' },
-    { '@type': 'Place', name: 'Provincia di Varese' },
-    { '@type': 'Place', name: 'Online (Italia)' },
-  ],
-});
+export const serviceSchema = (s: { title: string; description: string; slug: string }, locale: Locale) => {
+  const m = getDict(locale).meta;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: s.title,
+    description: s.description,
+    url: id(locale, `/servizi/${s.slug}`),
+    serviceType: s.title,
+    provider: { '@id': practiceId },
+    areaServed: [
+      { '@type': 'Place', name: 'Cremenaga (VA)' },
+      { '@type': 'Place', name: m.areaProvince },
+      { '@type': 'Place', name: m.areaOnline },
+    ],
+  };
+};

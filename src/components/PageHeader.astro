@@ -1,14 +1,16 @@
 ---
+import { i18n } from '../i18n';
 interface Props { title: string; lead?: string; crumbs?: { name: string; href: string }[]; eyebrow?: string }
 const { title, lead, crumbs = [], eyebrow } = Astro.props;
+const { t, l } = i18n(Astro);
 ---
 
 <section class="bg-sage-100">
   <div class="container-page py-12 md:py-16">
     {crumbs.length > 0 && (
-      <nav aria-label="Breadcrumb" class="mb-5 text-sm">
+      <nav aria-label={t.common.breadcrumb} class="mb-5 text-sm">
         <ol class="flex flex-wrap items-center gap-2">
-          <li><a href="/">Home</a></li>
+          <li><a href={l('/')}>{t.common.home}</a></li>
           {crumbs.map((c, i) => (
             <li class="flex items-center gap-2">
               <span aria-hidden="true">/</span>

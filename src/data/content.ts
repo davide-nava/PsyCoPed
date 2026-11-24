@@ -3,6 +3,7 @@
  * Items flagged VERIFY must be completed or confirmed by the practice
  * (the legacy sites only provide section titles for several of them).
  */
+import type { Locale } from '../i18n';
 
 export interface ContentItem {
   title: string;
@@ -12,12 +13,21 @@ export interface ContentItem {
 }
 
 // VERIFY: complete from the legacy "Pubblicazioni & Progetti" pages.
-export const publications: ContentItem[] = [
-  {
-    title: 'Collaborazione editoriale con TXT-RSI (Svizzera)',
-    description: 'Contributi editoriali di carattere psicologico e pedagogico.',
-  },
-];
+const publicationsText: Record<Locale, ContentItem[]> = {
+  it: [
+    {
+      title: 'Collaborazione editoriale con TXT-RSI (Svizzera)',
+      description: 'Contributi editoriali di carattere psicologico e pedagogico.',
+    },
+  ],
+  en: [
+    {
+      title: 'Editorial collaboration with TXT-RSI (Switzerland)',
+      description: 'Editorial contributions on psychological and pedagogical topics.',
+    },
+  ],
+};
+export const getPublications = (locale: Locale): ContentItem[] => publicationsText[locale];
 
 // VERIFY: add interview titles, outlets, dates and links from the legacy sites.
 export const interviews: ContentItem[] = [];
@@ -26,6 +36,3 @@ export const interviews: ContentItem[] = [];
 export const discography: ContentItem[] = [];
 export const musicProjects: ContentItem[] = [];
 export const videos: { title: string; youtubeId: string }[] = [];
-
-export const artisticBioEn =
-  'Mirko Provini is also active as a vocal coach and in the artistic field. His artistic biography, discography, videos and music projects are being migrated from the original website.';

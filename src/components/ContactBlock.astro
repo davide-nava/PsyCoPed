@@ -1,28 +1,31 @@
 ---
-import { site, professionals } from '../config/site';
+import { site, getProfessionals } from '../config/site';
+import { i18n } from '../i18n';
+const { locale, t, l } = i18n(Astro);
+const professionals = getProfessionals(locale);
 ---
 
 <section class="section bg-white" aria-labelledby="contact-block-title">
   <div class="container-page grid gap-10 md:grid-cols-2">
     <div>
-      <p class="eyebrow">Dove siamo</p>
-      <h2 id="contact-block-title">Studio PsyCoPed, Cremenaga (VA)</h2>
+      <p class="eyebrow">{t.contactBlock.eyebrow}</p>
+      <h2 id="contact-block-title">{t.contactBlock.title}</h2>
       <address class="mt-5 space-y-2 not-italic">
-        <p>{site.address.full}</p>
+        <p>{site.address.full[locale]}</p>
         <p>{professionals.provini.name}: <a href={`tel:${professionals.provini.phoneRaw}`}>{professionals.provini.phone}</a></p>
         <p>{professionals.coccia.name}: <a href={`tel:${professionals.coccia.phoneRaw}`}>{professionals.coccia.phone}</a></p>
-        <p>Email: <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></p>
+        <p>{t.common.email}: <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></p>
         <p>PEC: <a href={`mailto:${site.contact.pec}`}>{site.contact.pec}</a></p>
       </address>
       <div class="mt-6 flex flex-wrap gap-3">
-        <a class="btn btn-primary" href="/prenota">Prenota una seduta</a>
-        <a class="btn btn-secondary" href="/contatti">Richiedi informazioni</a>
+        <a class="btn btn-primary" href={l('/prenota')}>{t.common.bookSession}</a>
+        <a class="btn btn-secondary" href={l('/contatti')}>{t.common.requestInfo}</a>
       </div>
     </div>
     <div class="card bg-sage-100">
-      <h3>In studio e online</h3>
-      <p class="mt-3">Gli incontri si svolgono presso lo studio di Cremenaga, in provincia di Varese, oppure in videoconsulenza.</p>
-      <p class="mt-3"><a href={site.address.mapsUrl} target="_blank" rel="noopener noreferrer">Indicazioni stradali su Google Maps<span class="sr-only"> (si apre in una nuova scheda)</span></a></p>
+      <h3>{t.contactBlock.cardTitle}</h3>
+      <p class="mt-3">{t.contactBlock.cardText}</p>
+      <p class="mt-3"><a href={site.address.mapsUrl} target="_blank" rel="noopener noreferrer">{t.contactBlock.directions}<span class="sr-only">{t.common.newTab}</span></a></p>
     </div>
   </div>
 </section>

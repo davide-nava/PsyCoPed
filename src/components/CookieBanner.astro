@@ -2,44 +2,46 @@
 // Granular cookie consent. The site sets no analytics or marketing cookies by default;
 // the categories exist so that any future tool is loaded ONLY after explicit opt-in
 // (listen for the `psycoped:consent` event on `window`).
+import { i18n } from '../i18n';
+const { t, l } = i18n(Astro);
+const c = t.cookieBanner;
 ---
 
-<div id="cookie-banner" role="region" aria-label="Consenso cookie" hidden
+<div id="cookie-banner" role="region" aria-label={c.region} hidden
   class="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-white p-5 shadow-2xl">
   <div class="container-page flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
     <p class="max-w-3xl text-base">
-      Utilizziamo cookie tecnici necessari al funzionamento del sito. Altre categorie (statistiche e contenuti di terze parti, come i video)
-      vengono attivate solo con il tuo consenso. Leggi la <a href="/cookie">Cookie Policy</a>.
+      {c.text} <a href={l('/cookie')}>{c.policyLink}</a>.
     </p>
     <div class="flex flex-wrap gap-3">
-      <button type="button" class="btn btn-secondary" data-consent="reject">Solo necessari</button>
-      <button type="button" class="btn btn-secondary" data-open-cookie-settings>Personalizza</button>
-      <button type="button" class="btn btn-primary" data-consent="all">Accetta tutti</button>
+      <button type="button" class="btn btn-secondary" data-consent="reject">{c.reject}</button>
+      <button type="button" class="btn btn-secondary" data-open-cookie-settings>{c.customize}</button>
+      <button type="button" class="btn btn-primary" data-consent="all">{c.acceptAll}</button>
     </div>
   </div>
 </div>
 
 <dialog id="cookie-dialog" aria-labelledby="cookie-dialog-title" class="m-auto w-[min(92vw,34rem)] rounded-2xl p-0 backdrop:bg-slate-900/50">
   <form method="dialog" id="cookie-form" class="space-y-5 p-6">
-    <h2 id="cookie-dialog-title" class="!text-2xl">Preferenze cookie</h2>
+    <h2 id="cookie-dialog-title" class="!text-2xl">{c.dialogTitle}</h2>
     <fieldset class="space-y-4">
-      <legend class="sr-only">Categorie di cookie</legend>
+      <legend class="sr-only">{c.categories}</legend>
       <label class="flex items-start gap-3">
         <input type="checkbox" checked disabled class="mt-1.5 h-5 w-5" />
-        <span><strong>Necessari</strong><br /><span class="hint">Indispensabili al funzionamento (es. memorizzare questa scelta). Sempre attivi.</span></span>
+        <span><strong>{c.necessary}</strong><br /><span class="hint">{c.necessaryHint}</span></span>
       </label>
       <label class="flex items-start gap-3">
         <input type="checkbox" name="analytics" class="mt-1.5 h-5 w-5" />
-        <span><strong>Statistiche</strong><br /><span class="hint">Misurazione anonima delle visite. Attualmente nessuno strumento attivo.</span></span>
+        <span><strong>{c.analytics}</strong><br /><span class="hint">{c.analyticsHint}</span></span>
       </label>
       <label class="flex items-start gap-3">
         <input type="checkbox" name="media" class="mt-1.5 h-5 w-5" />
-        <span><strong>Contenuti di terze parti</strong><br /><span class="hint">Video incorporati (es. YouTube) che possono impostare cookie propri.</span></span>
+        <span><strong>{c.media}</strong><br /><span class="hint">{c.mediaHint}</span></span>
       </label>
     </fieldset>
     <div class="flex flex-wrap justify-end gap-3">
-      <button type="button" class="btn btn-secondary" id="cookie-cancel">Annulla</button>
-      <button type="submit" class="btn btn-primary">Salva preferenze</button>
+      <button type="button" class="btn btn-secondary" id="cookie-cancel">{c.cancel}</button>
+      <button type="submit" class="btn btn-primary">{c.save}</button>
     </div>
   </form>
 </dialog>

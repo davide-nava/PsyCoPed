@@ -1,11 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { it } from '../i18n/it';
+import { en } from '../i18n/en';
+// A static host serves one 404 for every path, so it is shown in both languages.
 ---
 
-<BaseLayout title="Pagina non trovata" description="La pagina richiesta non esiste." noindex>
+<BaseLayout title={it.notFound.title} description={it.notFound.description} noindex>
   <section class="section"><div class="container-page max-w-2xl text-center">
-    <h1>Pagina non trovata</h1>
-    <p class="mt-4">La pagina che cerchi non esiste o è stata spostata.</p>
-    <a class="btn btn-primary mt-8" href="/">Torna alla home</a>
+    <h1>{it.notFound.title}</h1>
+    <p class="mt-4">{it.notFound.text}</p>
+    <a class="btn btn-primary mt-8" href="/">{it.notFound.back}</a>
+    <hr class="my-10 border-line" />
+    <p lang="en" class="text-2xl font-semibold text-navy-900">{en.notFound.title}</p>
+    <p lang="en" class="mt-4">{en.notFound.text}</p>
+    <a lang="en" class="btn btn-secondary mt-8" href="/en">{en.notFound.back}</a>
   </div></section>
 </BaseLayout>

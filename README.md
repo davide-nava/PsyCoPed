@@ -1,6 +1,6 @@
 # Studio PsyCoPed — sito unificato
 
-Astro 7 + TypeScript + Tailwind CSS 4. Static output, vanilla-TS interactive islands (no framework runtime), Italian copy, English code.
+Astro 7 + TypeScript + Tailwind CSS 4. Static output, vanilla-TS interactive islands (no framework runtime), bilingual site (Italian default at `/`, English at `/en`), English code.
 
 ```bash
 npm install
@@ -13,6 +13,7 @@ npm run build    # static site in dist/
 
 | Path | Purpose |
 |---|---|
+| `src/i18n/` | UI dictionaries (`it.ts` is the source of truth, `en.ts` is typed against it), locale helpers (`localePath`, `i18n(Astro)`) |
 | `src/config/site.ts` | Address, contacts, professionals, nav, opening hours, endpoints |
 | `src/data/` | Services, FAQ, publications/artistic content |
 | `src/lib/availability.ts` | **Sample** agenda generator (swap for Cal.com / Google Calendar / custom API) |
@@ -22,6 +23,8 @@ npm run build    # static site in dist/
 | `src/components/BookingWidget.astro` | 5-step booking flow (`/prenota`) |
 | `src/components/ContactForm.astro` | Accessible contact form (`/contatti`) |
 | `src/components/CookieBanner.astro` | Granular consent; emits `psycoped:consent` on `window` |
+
+Every route also exists under `/en` (pages live in `src/pages/[...lang]/`; slugs are shared between languages). The header switcher links to the same page in the other language. To add copy, add the key to `it.ts` and `en.ts`; `npm run test:i18n` (run in CI) and `npm run check` fail if the two diverge. Long legal pages (privacy, cookie, note legali) and a few rich-text paragraphs are written inline per language in the page files.
 
 Routes: `/`, `/chi-sono`, `/servizi`, `/servizi/[slug]`, `/come-funziona`, `/prenota`, `/contatti`, `/pubblicazioni`, `/interviste`, `/vocal-coach`, `/privacy`, `/cookie`, `/note-legali`.
 
