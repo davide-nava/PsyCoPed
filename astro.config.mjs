@@ -3,27 +3,64 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
-// TODO(go-live): set to the real production domain.
+const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://davide-nava.github.io').replace(/\/+$/, '');
+const rawBase = process.env.PUBLIC_BASE_PATH || '/PsyCoPed/';
+const normalizedBase = `/${rawBase.replace(/^\/+|\/+$/g, '')}/`.replace(/^\/\/$/, '/');
+const rootUrl = `${siteUrl}${normalizedBase}`;
+
+// https://astro.build/config
 export default defineConfig({
-  site: 'https://www.studiopsycoped.it',
+  site: siteUrl,
+  base: normalizedBase,
   output: 'static',
-  trailingSlash: 'never',
-  build: { format: 'file' },
+  trailingSlash: 'always',
+  build: {
+    format: 'directory',
+  },
+  i18n: {
+    defaultLocale: 'it',
+    locales: ['it', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+      redirectToDefaultLocale: false,
+    },
+  },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/404') && !page.endsWith('/interviste'), // thin until populated
-      // Adds <xhtml:link rel="alternate" hreflang> entries linking each page to its translation.
-      // Routing itself lives in src/pages/[...lang] and src/i18n (Italian at "/", English at "/en").
-      i18n: { defaultLocale: 'it', locales: { it: 'it-IT', en: 'en-GB' } },
+      changefreq: 'weekly',
+      priority: 0.8,
+      lastmod: new Date(),
+      i18n: {
+        defaultLocale: 'it',
+        locales: {
+          it: 'it-IT',
+          en: 'en-US',
+        },
+      },
       serialize(item) {
-        // Locale-less path, so the same priorities apply to both languages.
-        const p = new URL(item.url).pathname.replace(/^\/en(?=\/|$)/, '') || '/';
-        item.lastmod = new Date().toISOString();
-        item.changefreq = 'monthly';
-        item.priority = p === '/' ? 1.0 : p === '/prenota' || p === '/servizi' || p.startsWith('/servizi/') ? 0.9 : ['/privacy', '/cookie', '/note-legali'].includes(p) ? 0.2 : 0.7;
+        const { url } = item;
+
+        if (url === rootUrl || url === `${rootUrl}en/`) {
+          return {
+            ...item,
+            priority: 1.0,
+          };
+        }
+
+        if (
+          /\/(servizi|chi-siamo|prenota|contatti|faq|services|about|book|contact)\/$/.test(url)
+        ) {
+          return {
+            ...item,
+            priority: 0.9,
+          };
+        }
+
         return item;
       },
     }),
   ],
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });

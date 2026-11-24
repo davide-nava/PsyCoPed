@@ -1,31 +1,56 @@
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
-.angular/
+# Build output
+dist/
 
-# Node modules and dependency files
-/node_modules/
+# Astro generated runtime and types
+.astro/
+
+# Dependencies
+node_modules/
 
 # Environment files
-/.env
-
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
-
-# TypeScript cache
-*.tsbuildinfo
+.env
+.env.production
+.env.development
+.env.local
+.env.*.local
+!.env.example
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-.astro/
-dist/
-.env
-.wrangler/
+# Cache & temporary directories
+.cache/
+.temp/
+.tmp/
+
+# IDE & Editor files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+
+.claude-build/
+.claude/settings.local.json
+.claude/*.local.md
+# AI tools: local state and scratch files
+.claude/worktrees/
+.sandbox/
+*.tmp

@@ -1,4 +1,4 @@
-name: Deploy FatturaFacile Astro Site
+name: Deploy PsyCoPed Astro Site
 
 on:
   push:
@@ -44,7 +44,14 @@ jobs:
         run: npm run check
 
       - name: Build Astro SSG
+        env:
+          PUBLIC_SITE_URL: 'https://davide-nava.github.io'
+          PUBLIC_BASE_PATH: '/PsyCoPed/'
         run: npm run build
+
+      - name: Ensure .nojekyll Exists in Dist
+        if: github.ref == 'refs/heads/main'
+        run: touch ./dist/.nojekyll
 
       - name: Upload GitHub Pages Artifact
         if: github.ref == 'refs/heads/main'
