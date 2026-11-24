@@ -18,7 +18,7 @@ export interface Service {
   intro: string;
   sections: ServiceSection[];
   firstSession: string;
-  /** Matches an id in `bookingServices`. */
+  /** Matches an id in `bookingServices` (src/data/agenda.ts). */
   bookingId: string;
   seo: { title: string; description: string };
 }
@@ -28,7 +28,7 @@ type ServiceText = Omit<Service, 'slug' | 'icon' | 'bookingId'>;
 /** Language-independent part of each service. */
 const base = [
   { slug: 'consulenza-psicologica', icon: 'chat', bookingId: 'consulenza-psicologica' },
-  { slug: 'potenziamento-cognitivo', icon: 'bolt', bookingId: 'consulenza-psicologica' },
+  { slug: 'potenziamento-cognitivo', icon: 'bolt', bookingId: 'potenziamento-cognitivo' },
   { slug: 'neuropsicologia', icon: 'brain', bookingId: 'neuropsicologia' },
   { slug: 'consulenza-pedagogica', icon: 'book', bookingId: 'pedagogica-dsa' },
   { slug: 'ipnosi', icon: 'spiral', bookingId: 'ipnosi' },
@@ -403,32 +403,3 @@ export const getServices = (locale: Locale): Service[] =>
   base.map((b) => ({ ...b, ...text[locale][b.slug] }));
 
 export const serviceSlugs: string[] = base.map((b) => b.slug);
-
-/** Durations are sample values — VERIFY with the practice. */
-const bookingBase = [
-  { id: 'consulenza-psicologica', minutes: 50 },
-  { id: 'neuropsicologia', minutes: 60 },
-  { id: 'pedagogica-dsa', minutes: 50 },
-  { id: 'ipnosi', minutes: 50 },
-  { id: 'coaching', minutes: 50 },
-] as const;
-
-const bookingLabels: Record<Locale, Record<(typeof bookingBase)[number]['id'], string>> = {
-  it: {
-    'consulenza-psicologica': 'Consulenza Psicologica Individuale',
-    neuropsicologia: 'Valutazione / Consulenza Neuropsicologica',
-    'pedagogica-dsa': 'Consulenza Pedagogica / DSA',
-    ipnosi: 'Ipnosi',
-    coaching: 'Coaching / Career Enhancement / Transpersonale',
-  },
-  en: {
-    'consulenza-psicologica': 'Individual Psychological Counselling',
-    neuropsicologia: 'Neuropsychological Assessment / Consultation',
-    'pedagogica-dsa': 'Pedagogical Counselling / SLD',
-    ipnosi: 'Hypnosis',
-    coaching: 'Coaching / Career Enhancement / Transpersonal',
-  },
-};
-
-export const getBookingServices = (locale: Locale) =>
-  bookingBase.map((b) => ({ id: b.id as string, minutes: b.minutes as number, label: bookingLabels[locale][b.id] }));

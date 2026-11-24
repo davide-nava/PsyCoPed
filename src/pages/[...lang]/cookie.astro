@@ -22,9 +22,9 @@ const crumbs = [{ name: p.cookieTitle, href: l('/cookie') }];
           <p>I cookie sono piccoli file di testo (o tecnologie analoghe, come il localStorage) memorizzati sul dispositivo per far funzionare il sito o raccogliere informazioni.</p>
           <h2>Categorie</h2>
           <ul>
-            <li><strong>Necessari:</strong> indispensabili al funzionamento; non richiedono consenso.</li>
-            <li><strong>Statistiche:</strong> misurazione delle visite; attivi solo con consenso.</li>
-            <li><strong>Contenuti di terze parti:</strong> servizi esterni che possono impostare propri cookie; attivi solo con consenso.</li>
+            <li><strong>Necessari (<code>necessary</code>):</strong> indispensabili al funzionamento; non richiedono consenso.</li>
+            <li><strong>Funzionali (<code>functional</code>):</strong> preferenze e comodità facoltative; attivi solo con consenso. Attualmente nessuno.</li>
+            <li><strong>Servizi esterni (<code>external</code>):</strong> contenuti di terze parti (es. video YouTube) che possono impostare propri cookie; attivi solo con consenso.</li>
           </ul>
           <p>Il sito non usa font o script esterni per default e non utilizza cookie di profilazione.</p>
         </>
@@ -34,9 +34,9 @@ const crumbs = [{ name: p.cookieTitle, href: l('/cookie') }];
           <p>Cookies are small text files (or similar technologies, such as localStorage) stored on your device to make the site work or to collect information.</p>
           <h2>Categories</h2>
           <ul>
-            <li><strong>Necessary:</strong> essential for the site to work; they do not require consent.</li>
-            <li><strong>Statistics:</strong> measurement of visits; active only with consent.</li>
-            <li><strong>Third-party content:</strong> external services that may set their own cookies; active only with consent.</li>
+            <li><strong>Necessary (<code>necessary</code>):</strong> essential for the site to work; they do not require consent.</li>
+            <li><strong>Functional (<code>functional</code>):</strong> optional preferences and conveniences; active only with consent. Currently none.</li>
+            <li><strong>External services (<code>external</code>):</strong> third-party content (e.g. YouTube videos) that may set their own cookies; active only with consent.</li>
           </ul>
           <p>By default the site does not use external fonts or scripts and does not use profiling cookies.</p>
         </>
@@ -53,19 +53,23 @@ const crumbs = [{ name: p.cookieTitle, href: l('/cookie') }];
       {locale === 'it' ? (
         <>
           <h2>Gestisci le preferenze</h2>
-          <p>Puoi modificare o revocare il consenso in qualsiasi momento.</p>
+          <p>Puoi accettare, rifiutare o salvare scelte per categoria, e modificarle o revocarle in qualsiasi momento (anche dal link «Preferenze cookie» nel piè di pagina).</p>
         </>
       ) : (
         <>
           <h2>Manage your preferences</h2>
-          <p>You can change or withdraw your consent at any time.</p>
+          <p>You can accept, reject or save choices per category, and change or withdraw them at any time (also from the “Cookie preferences” link in the footer).</p>
         </>
       )}
       <button type="button" class="btn btn-primary" data-open-cookie-settings>{p.cookieOpenPrefs}</button>
       {locale === 'it' ? (
-        <p>Puoi inoltre gestire i cookie dalle impostazioni del browser. Titolare del trattamento e diritti: vedi l’<a href={l('/privacy')}>Informativa Privacy</a>.</p>
+        <h2>Impostazioni del browser</h2>
+        <p>Puoi bloccare o eliminare i cookie anche dal browser: in Chrome <em>Impostazioni → Privacy e sicurezza → Cookie</em>; in Firefox <em>Impostazioni → Privacy e sicurezza</em>; in Safari <em>Impostazioni → Privacy → Gestisci dati dei siti web</em>; in Edge <em>Impostazioni → Cookie e autorizzazioni sito</em>. Eliminare i dati del sito cancella anche la tua scelta, che ti verrà richiesta di nuovo.</p>
+        <p>Titolare del trattamento e diritti: vedi l’<a href={l('/privacy')}>Informativa Privacy</a>.</p>
       ) : (
-        <p>You can also manage cookies from your browser settings. For the data controller and your rights, see the <a href={l('/privacy')}>Privacy Policy</a>.</p>
+        <h2>Browser settings</h2>
+        <p>You can also block or delete cookies in your browser: in Chrome <em>Settings → Privacy and security → Cookies</em>; in Firefox <em>Settings → Privacy &amp; Security</em>; in Safari <em>Settings → Privacy → Manage Website Data</em>; in Edge <em>Settings → Cookies and site permissions</em>. Deleting site data also removes your choice, which will be asked again.</p>
+        <p>For the data controller and your rights, see the <a href={l('/privacy')}>Privacy Policy</a>.</p>
       )}
     </div>
   </div></section>

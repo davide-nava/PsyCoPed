@@ -91,7 +91,7 @@ const clientT = { locale, validation: t.validation, form: f };
 
 <script>
   import { validateContact, type ContactPayload } from '../lib/validation';
-  import { postJson, mailtoHref } from '../lib/submit';
+  import { submitToEndpoint, mailtoHref, type SubmitResult } from '../lib/submit';
   import { site } from '../config/site';
   import type { Dict } from '../i18n/it';
 
@@ -131,25 +131,90 @@ const clientT = { locale, validation: t.validation, form: f };
     return true;
   }
 
+  const summaryText = (p: ContactPayload) =>
+    [
+      `${T.form.mailService}: ${p.subject}`,
+      `${T.form.mailName}: ${p.name}`,
+      `Email: ${p.email}`,
+      p.phone ? `${T.form.mailPhone}: ${p.phone}` : '',
+      `${T.form.mailChannel}: ${T.form.channels[p.channel]}`,
+      '',
+      `${T.form.mailMessage}: ${p.message}`,
+    ].filter((line, index, all) => line || all[index - 1] !== '').join('\n');
+
+  /** Fallback card: shown when no endpoint is configured or the network submission fails. */
+  function renderFallback(payload: ContactPayload, result: SubmitResult) {
+    const summary = summaryText(payload);
+    const title = result.reason === 'no-endpoint' ? T.form.noEndpointTitle : result.reason === 'timeout' ? T.form.timeoutTitle : T.form.failTitle;
+    const intro = result.reason === 'no-endpoint' ? T.form.noEndpointText : T.form.failBefore;
+    status.replaceChildren();
+    const make = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '', className = '') => {
+      const el = document.createElement(tag);
+      el.textContent = text;
+      if (className) el.className = className;
+      return el;
+    };
+    const link = (href: string, text: string) => {
+      const a = make('a', text);
+      a.href = href;
+      return a;
+    };
+    const pre = make('pre', summary, 'mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 text-sm');
+    const copy = make('button', T.form.copySummary, 'btn btn-secondary');
+    copy.type = 'button';
+    const copied = make('span', '', 'ml-3 text-sm');
+    copied.setAttribute('role', 'status');
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(summary);
+        copied.textContent = T.form.copied;
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        getSelection()?.removeAllRanges();
+        getSelection()?.addRange(range);
+      }
+    });
+    const mail = link(mailtoHref(site.contact.email, `${T.form.mailSubject} ${payload.subject}`, summary), T.form.sendByEmail);
+    mail.className = 'btn btn-primary';
+    const contacts = make('ul', '', 'mt-4 space-y-1');
+    const li = (label: string, a: HTMLAnchorElement) => {
+      const item = make('li', `${label}: `);
+      item.append(a);
+      contacts.append(item);
+    };
+    li('Email', link(`mailto:${site.contact.email}`, site.contact.email));
+    li(T.form.pecLabel, link(`mailto:${site.contact.pec}`, site.contact.pec));
+    li(T.form.mailPhone, link(`tel:${site.contact.phoneRaw}`, site.contact.phone));
+    li(T.form.messagingLabel, link(`https://wa.me/${site.contact.phoneRaw.replace('+', '')}`, site.contact.phone));
+    const actions = make('div', '', 'mt-4 flex flex-wrap items-center');
+    actions.append(mail, copy, copied);
+    status.append(make('p', title, 'font-semibold'), make('p', intro), make('p', T.form.summaryTitle, 'mt-3 font-semibold'), pre, actions, contacts);
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     status.hidden = true;
     const payload = read();
     if (showErrors(validateContact(payload, T.validation))) return;
-    if (payload.website) return; // bot
+    if (payload.website) return; // honeypot filled: bot
     const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
     btn.disabled = true; btn.textContent = T.form.sending;
-    const res = await postJson(form.dataset.endpoint!, payload);
+    const { website: _honeypot, ...data } = payload;
+    const result = await submitToEndpoint(form.dataset.endpoint ?? '', data);
     btn.disabled = false; btn.textContent = T.form.submit;
     status.hidden = false;
-    if (res.ok) {
-      status.innerHTML = `<p class="font-semibold">${esc(T.form.okTitle)}</p><p>${esc(T.form.okText)}</p>`;
+    if (result.ok) {
+      status.replaceChildren();
+      const title = document.createElement('p');
+      title.className = 'font-semibold';
+      title.textContent = T.form.okTitle;
+      const text = document.createElement('p');
+      text.textContent = T.form.okText;
+      status.append(title, text);
       form.reset();
     } else {
-      const body = `${T.form.mailName}: ${payload.name}\n${T.form.mailPhone}: ${payload.phone}\n${T.form.mailChannel}: ${payload.channel}\n\n${payload.message}`;
-      status.innerHTML = `<p class="font-semibold">${esc(T.form.failTitle)}</p>
-        <p>${esc(T.form.failBefore)} <a href="${mailtoHref(site.contact.email, T.form.mailSubject + ' ' + payload.subject, body)}">${esc(T.form.failEmail)}</a>${esc(T.form.failAfterEmail)}
-        <a href="mailto:${site.contact.pec}">${site.contact.pec}</a> ${esc(T.form.failOr)} <a href="tel:${site.contact.phoneRaw}">${site.contact.phone}</a>.</p>`;
+      renderFallback(payload, result);
     }
     status.focus();
   });

@@ -10,7 +10,7 @@ export interface ContactPayload {
   phone?: string;
   callbackWindow?: string;
   subject: string;
-  channel: 'phone' | 'email' | 'whatsapp' | 'telegram';
+  channel: 'phone' | 'email' | 'messaging';
   message: string;
   consent: boolean;
   /** Honeypot: must stay empty. */
@@ -39,7 +39,7 @@ export type Errors<T> = Partial<Record<keyof T, string>>;
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE = /^[+]?[\d\s().-]{7,20}$/;
-const CHANNELS = ['phone', 'email', 'whatsapp', 'telegram'];
+const CHANNELS = ['phone', 'email', 'messaging'];
 
 export function validateContact(p: Partial<ContactPayload>, m: ValidationMessages = it.validation): Errors<ContactPayload> {
   const e: Errors<ContactPayload> = {};
@@ -48,7 +48,7 @@ export function validateContact(p: Partial<ContactPayload>, m: ValidationMessage
   if (p.phone && !PHONE.test(p.phone.trim())) e.phone = m.phone;
   if (!p.subject) e.subject = m.subject;
   if (!p.channel || !CHANNELS.includes(p.channel)) e.channel = m.channel;
-  if (p.channel === 'phone' || p.channel === 'whatsapp' || p.channel === 'telegram') {
+  if (p.channel === 'phone' || p.channel === 'messaging') {
     if (!p.phone?.trim()) e.phone = m.phoneRequired;
   }
   if (!p.message || p.message.trim().length < 10) e.message = m.messageShort;

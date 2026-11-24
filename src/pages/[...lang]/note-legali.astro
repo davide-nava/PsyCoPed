@@ -17,6 +17,13 @@ const crumbs = [{ name: p.legalCrumb, href: l('/note-legali') }];
   <PageHeader title={p.legalTitle} crumbs={crumbs} />
   <section class="section"><div class="container-page">
     <DraftBanner />
+    <div role="alert" class="mb-8 rounded-xl border-2 border-alert bg-alert-bg p-5 text-ink">
+      {locale === 'it' ? (
+        <p><strong class="text-alert">Emergenze.</strong> Questo sito non è un servizio di emergenza medica o psichiatrica. In caso di pericolo o crisi acuta chiama il <a class="font-semibold text-alert" href="tel:112">112</a> o recati al Pronto Soccorso più vicino.</p>
+      ) : (
+        <p><strong class="text-alert">Emergencies.</strong> This website is not a medical or psychiatric emergency service. In case of danger or acute crisis call <a class="font-semibold text-alert" href="tel:112">112</a> or go to the nearest Emergency Room.</p>
+      )}
+    </div>
     <div class="prose-clinic">
       {locale === 'it' ? (
         <>
@@ -24,18 +31,20 @@ const crumbs = [{ name: p.legalCrumb, href: l('/note-legali') }];
           <p>{site.name} — {site.address.full.it}.<br />Partita IVA: {site.admin.vatNumber}<br />Codice fiscale: {site.admin.fiscalCode}<br />Email: {site.contact.email} — PEC: {site.contact.pec}</p>
           <h2>Professionisti</h2>
           <ul>
-            <li>{professionals.provini.name}, {professionals.provini.title}. {professionals.provini.registration}.</li>
-            <li>{professionals.coccia.name}, {professionals.coccia.title}. Iscrizione all’Albo: <em>da completare</em>.</li>
+            <li>{professionals.provini.name}, {professionals.provini.title} — Albo degli Psicologi, Ordine degli Psicologi della Lombardia (OPL), <strong>n. 24451</strong>.</li>
+            <li>{professionals.coccia.name}, {professionals.coccia.title}. Iscrizione all’Albo/registro professionale: <em>da completare</em>.</li>
           </ul>
           <p>I professionisti esercitano nel rispetto del Codice Deontologico degli Psicologi Italiani. Polizza assicurativa di responsabilità civile professionale: <em>da completare</em>.</p>
+          <h2>Comunicazione deontologica e trasparenza del percorso</h2>
+          <p>Le informazioni sul sito rispettano i principi di correttezza, decoro e veridicità della pubblicità professionale previsti dal Codice Deontologico (art. 40): nessuna promessa di risultati garantiti, nessun confronto con altri professionisti. Il percorso (obiettivi, metodo, durata, tariffe, modalità online) viene illustrato prima dell’inizio e può essere avviato solo con consenso informato (art. 24); ciascuno può interromperlo in ogni momento.</p>
           <h2>Natura informativa del sito</h2>
           <p>I contenuti hanno finalità esclusivamente informativa e non sostituiscono visita, diagnosi o trattamento. Il sito e i moduli di contatto non sono un servizio di emergenza: in caso di pericolo immediato chiama il 112.</p>
           <h2>Tariffe e onorari</h2>
           <p>Le tariffe sono comunicate prima dell’inizio del percorso. <em>Inserire il tariffario o rimandare al preventivo.</em></p>
           <h2>Proprietà intellettuale</h2>
           <p>Testi, immagini e marchi sono di proprietà dei rispettivi titolari; ne è vietata la riproduzione non autorizzata. Le citazioni (es. Alfred Adler) sono riportate a scopo illustrativo.</p>
-          <h2>Collegamenti esterni e responsabilità</h2>
-          <p>Lo studio non è responsabile dei contenuti di siti terzi raggiungibili tramite link.</p>
+          <h2>Limitazione di responsabilità</h2>
+          <p>Pur curando l’accuratezza dei contenuti, lo studio non garantisce che il sito sia sempre aggiornato, privo di errori o disponibile senza interruzioni, e non risponde di danni derivanti dall’uso delle informazioni pubblicate. Lo studio non è responsabile dei contenuti di siti terzi raggiungibili tramite link. Le richieste inviate dal sito non costituiscono un incarico: l’appuntamento è valido solo dopo conferma dello studio.</p>
           <h2>Legge applicabile</h2>
           <p>Legge italiana. Foro competente secondo le norme di legge.</p>
           <p><a href={l('/privacy')}>Privacy Policy</a> · <a href={l('/cookie')}>Cookie Policy</a></p>
@@ -46,18 +55,20 @@ const crumbs = [{ name: p.legalCrumb, href: l('/note-legali') }];
           <p>{site.name} — {site.address.full.en}.<br />VAT number (Partita IVA): {site.admin.vatNumber}<br />Tax code (Codice fiscale): {site.admin.fiscalCode}<br />Email: {site.contact.email} — PEC: {site.contact.pec}</p>
           <h2>Professionals</h2>
           <ul>
-            <li>{professionals.provini.name}, {professionals.provini.title}. {professionals.provini.registration}.</li>
+            <li>{professionals.provini.name}, {professionals.provini.title} — Register of Psychologists, Lombardy Order of Psychologists (OPL), <strong>no. 24451</strong>.</li>
             <li>{professionals.coccia.name}, {professionals.coccia.title}. Professional register enrolment: <em>to be completed</em>.</li>
           </ul>
           <p>The professionals practise in compliance with the Code of Ethics of Italian Psychologists. Professional liability insurance policy: <em>to be completed</em>.</p>
+          <h2>Ethical communication and transparency of the process</h2>
+          <p>The information on this site follows the principles of fairness, decorum and truthfulness for professional advertising set by the Code of Ethics (Art. 40): no guaranteed results and no comparison with other professionals. The path (goals, method, duration, fees, online format) is explained before it starts and begins only with informed consent (Art. 24); anyone may stop at any time.</p>
           <h2>Informational nature of the site</h2>
           <p>The content is for information purposes only and does not replace a visit, diagnosis or treatment. The site and the contact forms are not an emergency service: in case of immediate danger call 112.</p>
           <h2>Fees</h2>
           <p>Fees are communicated before the start of the path. <em>Insert the fee schedule or refer to a quotation.</em></p>
           <h2>Intellectual property</h2>
           <p>Texts, images and trademarks are the property of their respective owners; unauthorised reproduction is prohibited. Quotations (e.g. Alfred Adler) are reported for illustrative purposes.</p>
-          <h2>External links and liability</h2>
-          <p>The studio is not responsible for the content of third-party sites reachable through links.</p>
+          <h2>Liability disclaimer</h2>
+          <p>While we take care over the accuracy of the content, the studio does not guarantee that the site is always up to date, error-free or uninterrupted, and is not liable for damages arising from the use of the information published. The studio is not responsible for the content of third-party sites reachable through links. Requests sent from the site are not an engagement: an appointment is valid only once the studio confirms it.</p>
           <h2>Applicable law</h2>
           <p>Italian law. Competent court according to the rules of law.</p>
           <p><a href={l('/privacy')}>Privacy Policy</a> · <a href={l('/cookie')}>Cookie Policy</a></p>

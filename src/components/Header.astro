@@ -1,13 +1,11 @@
 ---
 import { nav } from '../config/site';
-import { i18n, locales, localePath, bcp47 } from '../i18n';
-interface Props { currentPath: string }
-/** `currentPath` is the locale-less path (see BaseLayout). */
-const { currentPath } = Astro.props;
+import { i18n, locales, bcp47 } from '../i18n';
+import { isActivePath, switchLocalePath } from '../utils/url';
 const { locale, t, l } = i18n(Astro);
-const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
+const isActive = (href: string) => isActivePath(Astro.url.pathname, l(href));
 const other = locales.find((x) => x !== locale)!;
-const switchHref = localePath(other, currentPath);
+const switchHref = switchLocalePath(Astro.url.pathname, other);
 ---
 
 <header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
@@ -37,7 +35,7 @@ const switchHref = localePath(other, currentPath);
       <a
         href={switchHref}
         data-lang-switch
-        hreflang={bcp47[other]}
+        hreflang={other}
         lang={bcp47[other]}
         aria-label={t.header.switchTo}
         title={t.header.switchTo}

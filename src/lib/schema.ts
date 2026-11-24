@@ -1,10 +1,14 @@
 import { site, getProfessionals } from '../config/site';
 import type { FaqItem } from '../data/faq';
 import { bcp47, getDict, localePath, type Locale } from '../i18n';
+import { withBase } from '../utils/url';
 
-const abs = (path: string) => `${site.url}${path}`;
+/** Deployed origin (`site` in astro.config.mjs). */
+const origin = import.meta.env.SITE ?? site.url;
+/** Absolute URL of an internal path or `public/` file, base path included. */
+const abs = (path: string) => new URL(withBase(path), origin).href;
 /** Absolute URL of a localized path. */
-const id = (locale: Locale, path: string) => abs(localePath(locale, path) === '/' ? '' : localePath(locale, path));
+const id = (locale: Locale, path: string) => abs(localePath(locale, path));
 /** Language-independent entity id (the practice is one entity across locales). */
 const practiceId = abs('/#practice');
 
@@ -27,7 +31,7 @@ export const practiceSchema = (locale: Locale) => ({
   '@type': ['MedicalBusiness', 'Psychologist'],
   '@id': practiceId,
   name: site.name,
-  url: site.url,
+  url: abs('/'),
   image: abs('/og-image.png'),
   logo: abs('/favicon.svg'),
   description: getDict(locale).meta.practiceDescription,
@@ -69,7 +73,7 @@ export const breadcrumbSchema = (crumbs: { name: string; href: string }[]) => ({
     position: i + 1,
     name: c.name,
     // Crumb hrefs are already localized by the pages.
-    item: abs(c.href === '/' ? '' : c.href),
+    item: new URL(c.href, origin).href,
   })),
 });
 

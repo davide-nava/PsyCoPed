@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.studiopsycoped.it/sitemap-index.xml
+Sitemap: https://davide-nava.github.io/PsyCoPed/sitemap-index.xml

@@ -2,13 +2,14 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import DraftBanner from '../../components/DraftBanner.astro';
-import { site } from '../../config/site';
+import { site, getProfessionals } from '../../config/site';
 import { i18n, getLocaleStaticPaths } from '../../i18n';
 
 export const getStaticPaths = getLocaleStaticPaths;
 
 const { locale, t, l } = i18n(Astro);
 const p = t.legalPages;
+const professionals = getProfessionals(locale);
 const crumbs = [{ name: p.privacyCrumb, href: l('/privacy') }];
 ---
 
@@ -20,64 +21,86 @@ const crumbs = [{ name: p.privacyCrumb, href: l('/privacy') }];
       {locale === 'it' ? (
         <>
           <h2>1. Titolare del trattamento</h2>
-          <p>Dott. Mirko Provini, Studio PsyCoPed, {site.address.full.it}. Email: {site.contact.email} — PEC: {site.contact.pec}. Partita IVA / C.F.: {site.admin.vatNumber} (da completare).</p>
-          <h2>2. Dati trattati</h2>
+          <p><strong>Studio PsyCoPed</strong>, {site.address.full.it}.</p>
           <ul>
-            <li><strong>Modulo contatti:</strong> nome e cognome, email, telefono (facoltativo), fascia oraria, servizio di interesse, canale preferito, contenuto del messaggio.</li>
-            <li><strong>Prenotazione:</strong> servizio, modalità, professionista, data e ora, nome, email, telefono, eventuale breve nota.</li>
-            <li><strong>Dati di navigazione:</strong> dati tecnici (es. indirizzo IP) trattati dal provider di hosting nei log di sistema.</li>
+            <li>{professionals.provini.name} — {professionals.provini.registration}.</li>
+            <li>{professionals.coccia.name} — {professionals.coccia.title}.</li>
           </ul>
-          <p>Si invita a non inserire nei campi liberi dati relativi alla salute: eventuali dati particolari (art. 9 GDPR) saranno raccolti solo in sede di colloquio, con consenso informato specifico.</p>
-          <h2>3. Finalità e basi giuridiche</h2>
+          <p>Contatti per la privacy: {site.contact.email} — PEC: {site.contact.pec}.<br />Partita IVA / C.F.: {site.admin.vatNumber} <em>(campo da completare)</em>.<br />Responsabile della protezione dei dati (DPO): <em>da verificare — non designato salvo obbligo di legge (art. 37 GDPR)</em>.</p>
+          <h2>2. Cosa NON raccoglie questo sito</h2>
+          <p><strong>Il sito non raccoglie cartelle cliniche, anamnesi, diagnosi o altri dati sanitari tramite i moduli pubblici.</strong> Ti invitiamo a non inserire dati relativi alla salute nei campi liberi: eventuali dati particolari (art. 9 GDPR) sono raccolti solo in sede di colloquio, con informativa e consenso specifici, e conservati nella documentazione professionale.</p>
+          <h2>3. Dati trattati</h2>
           <ul>
-            <li>Rispondere alle richieste e gestire le prenotazioni — esecuzione di misure precontrattuali su richiesta dell’interessato (art. 6.1.b) e consenso (art. 6.1.a).</li>
+            <li><strong>Modulo contatti:</strong> nome e cognome, email, telefono (facoltativo), canale di contatto preferito, servizio di interesse, contenuto del messaggio.</li>
+            <li><strong>Richiesta di appuntamento:</strong> servizio, modalità, professionista, data e ora, nome, email, telefono, eventuale breve nota non clinica.</li>
+            <li><strong>Dati tecnici di navigazione:</strong> indirizzo IP e dati di log trattati dal fornitore di hosting (GitHub Pages).</li>
+          </ul>
+          <p>Il sito è statico: non dispone di database né di un server proprio. Le richieste sono inoltrate solo se l’utente le invia (via email o, se configurato, tramite un servizio di raccolta moduli); la preferenza cookie è salvata solo nel tuo browser.</p>
+          <h2>4. Finalità e basi giuridiche</h2>
+          <ul>
+            <li>Rispondere alle richieste e gestire gli appuntamenti — misure precontrattuali su richiesta dell’interessato (art. 6.1.b GDPR) e consenso (art. 6.1.a).</li>
+            <li>Erogazione della prestazione professionale e trattamento di dati particolari relativi alla salute — consenso esplicito (art. 9.2.a GDPR) o finalità di cura da parte di professionista soggetto al segreto professionale (art. 9.2.h e 9.3 GDPR), raccolti fuori dal sito.</li>
             <li>Adempimenti fiscali e di legge — obbligo legale (art. 6.1.c).</li>
             <li>Sicurezza del sito — legittimo interesse (art. 6.1.f).</li>
           </ul>
-          <h2>4. Conservazione</h2>
-          <p>Le richieste non seguite da un incarico sono conservate per il tempo necessario a rispondere e, di norma, non oltre 12 mesi. I dati relativi a prestazioni professionali sono conservati per i termini previsti dalla legge (es. 10 anni per la documentazione fiscale). <em>Termini da confermare.</em></p>
-          <h2>5. Destinatari</h2>
-          <p>I dati non sono diffusi. Possono essere trattati da fornitori di servizi tecnici (hosting, posta elettronica, eventuale piattaforma di videoconsulenza e calendario) nominati responsabili del trattamento. <em>Elencare i fornitori effettivi.</em></p>
-          <h2>6. Trasferimenti extra-UE</h2>
-          <p>Qualora i fornitori trasferiscano dati fuori dallo Spazio Economico Europeo, ciò avviene con le garanzie previste dagli artt. 44 e ss. GDPR (es. clausole contrattuali tipo).</p>
-          <h2>7. Diritti dell’interessato</h2>
-          <p>Hai diritto di accesso, rettifica, cancellazione, limitazione, portabilità, opposizione e di revocare il consenso in qualsiasi momento, scrivendo a {site.contact.email} o alla PEC. Hai inoltre diritto di proporre reclamo al Garante per la protezione dei dati personali (<a href="https://www.garanteprivacy.it" rel="noopener noreferrer" target="_blank">garanteprivacy.it</a>).</p>
-          <h2>8. Natura del conferimento</h2>
-          <p>Il conferimento dei dati contrassegnati come obbligatori è necessario per rispondere alla richiesta; in caso di mancato conferimento non sarà possibile dar seguito alla richiesta.</p>
-          <h2>9. Cookie</h2>
+          <p>Il trattamento avviene nel rispetto del Regolamento (UE) 2016/679 e del D.Lgs. 196/2003 (Codice in materia di protezione dei dati personali) come modificato dal D.Lgs. 101/2018.</p>
+          <h2>5. Segreto professionale e riservatezza</h2>
+          <p>I professionisti sono tenuti al segreto professionale e alla riservatezza secondo il <em>Codice Deontologico degli Psicologi Italiani</em> (in particolare artt. 11 e 12) e, per la parte pedagogica, secondo la deontologia della professione. Le informazioni raccolte non sono comunicate a terzi se non con il consenso dell’interessato o nei casi previsti dalla legge.</p>
+          <h2>6. Conservazione</h2>
+          <p>Le richieste non seguite da un incarico sono conservate per il tempo necessario a rispondere e, di norma, non oltre 12 mesi. I dati relativi a prestazioni professionali sono conservati per i termini previsti dalla legge (es. 10 anni per la documentazione fiscale). <em>Termini da confermare in sede di revisione legale.</em></p>
+          <h2>7. Destinatari, responsabili e trasferimenti</h2>
+          <p>I dati non sono diffusi. Possono essere trattati, in qualità di responsabili del trattamento, da fornitori di servizi tecnici: hosting del sito (GitHub Pages, GitHub Inc./Microsoft), posta elettronica, eventuale servizio di raccolta moduli e piattaforma di videoconsulenza. <em>Elencare i fornitori effettivamente utilizzati.</em></p>
+          <p>Se un fornitore trasferisce dati fuori dallo Spazio Economico Europeo (es. Stati Uniti), ciò avviene con le garanzie degli artt. 44 e ss. GDPR (decisione di adeguatezza, ove applicabile, o clausole contrattuali tipo).</p>
+          <h2>8. Diritti dell’interessato (artt. 15–22 GDPR)</h2>
+          <p>Puoi esercitare in ogni momento i diritti di accesso (art. 15), rettifica (art. 16), cancellazione (art. 17), limitazione (art. 18), portabilità (art. 20), opposizione (art. 21) e di non essere sottoposto a decisioni basate unicamente su trattamenti automatizzati (art. 22), e revocare il consenso, scrivendo a {site.contact.email} o alla PEC {site.contact.pec}.</p>
+          <p>Hai inoltre diritto di proporre reclamo al <strong>Garante per la protezione dei dati personali</strong> (<a href="https://www.garanteprivacy.it" rel="noopener noreferrer" target="_blank">garanteprivacy.it<span class="sr-only">{t.common.newTab}</span></a>).</p>
+          <h2>9. Natura del conferimento</h2>
+          <p>Il conferimento dei dati contrassegnati come obbligatori è necessario per rispondere alla richiesta; in caso contrario non sarà possibile darvi seguito.</p>
+          <h2>10. Cookie</h2>
           <p>Per informazioni sui cookie consulta la <a href={l('/cookie')}>Cookie Policy</a>.</p>
-          <p class="text-sm text-slate-600">Ultimo aggiornamento: da definire alla pubblicazione.</p>
+          <p class="text-sm text-slate-600">Bozza informativa: <strong>da sottoporre a revisione legale</strong> prima della pubblicazione. Ultimo aggiornamento: da definire.</p>
         </>
       ) : (
         <>
           <h2>1. Data controller</h2>
-          <p>Dr. Mirko Provini, Studio PsyCoPed, {site.address.full.en}. Email: {site.contact.email} — PEC: {site.contact.pec}. VAT number / tax code: {site.admin.vatNumber} (to be completed).</p>
-          <h2>2. Data processed</h2>
+          <p><strong>Studio PsyCoPed</strong>, {site.address.full.en}.</p>
           <ul>
-            <li><strong>Contact form:</strong> first and last name, email, phone (optional), time slot, service of interest, preferred channel, message content.</li>
-            <li><strong>Booking:</strong> service, format, professional, date and time, name, email, phone, any brief note.</li>
-            <li><strong>Browsing data:</strong> technical data (e.g. IP address) processed by the hosting provider in system logs.</li>
+            <li>{professionals.provini.name} — {professionals.provini.registration}.</li>
+            <li>{professionals.coccia.name} — {professionals.coccia.title}.</li>
           </ul>
-          <p>Please do not enter health-related data in the free-text fields: any special-category data (Art. 9 GDPR) will be collected only during the session, with specific informed consent.</p>
-          <h2>3. Purposes and legal bases</h2>
+          <p>Privacy contacts: {site.contact.email} — PEC (certified email): {site.contact.pec}.<br />VAT / tax code: {site.admin.vatNumber} <em>(field to be completed)</em>.<br />Data Protection Officer (DPO): <em>to be verified — not appointed unless required by law (Art. 37 GDPR)</em>.</p>
+          <h2>2. What this website does NOT collect</h2>
+          <p><strong>The website does not collect clinical records, case histories, diagnoses or other health data through its public forms.</strong> Please do not enter health-related information in free-text fields: any special-category data (Art. 9 GDPR) is collected only during the session, with a specific notice and consent, and kept in professional records.</p>
+          <h2>3. Data processed</h2>
           <ul>
-            <li>Replying to requests and managing bookings — performance of pre-contractual measures at the data subject’s request (Art. 6.1.b) and consent (Art. 6.1.a).</li>
+            <li><strong>Contact form:</strong> full name, email, phone (optional), preferred contact channel, service of interest, message.</li>
+            <li><strong>Appointment request:</strong> service, format, professional, date and time, name, email, phone, optional short non-clinical note.</li>
+            <li><strong>Technical browsing data:</strong> IP address and log data processed by the hosting provider (GitHub Pages).</li>
+          </ul>
+          <p>The site is static: it has no database and no server of its own. Requests are forwarded only when you send them (by email or, if configured, through a form-collection service); your cookie preference is stored only in your browser.</p>
+          <h2>4. Purposes and legal bases</h2>
+          <ul>
+            <li>Answering requests and managing appointments — pre-contractual measures at the data subject’s request (Art. 6.1.b GDPR) and consent (Art. 6.1.a).</li>
+            <li>Delivering the professional service and processing health data — explicit consent (Art. 9.2.a GDPR) or healthcare purposes by a professional bound by professional secrecy (Art. 9.2.h and 9.3 GDPR), collected outside the website.</li>
             <li>Tax and legal obligations — legal obligation (Art. 6.1.c).</li>
             <li>Website security — legitimate interest (Art. 6.1.f).</li>
           </ul>
-          <h2>4. Retention</h2>
-          <p>Requests not followed by an engagement are kept for the time needed to reply and, as a rule, no longer than 12 months. Data relating to professional services are kept for the periods required by law (e.g. 10 years for tax documentation). <em>Terms to be confirmed.</em></p>
-          <h2>5. Recipients</h2>
-          <p>Data are not disclosed. They may be processed by technical service providers (hosting, email, any video-consultation and calendar platform) appointed as data processors. <em>List the actual providers.</em></p>
-          <h2>6. Transfers outside the EU</h2>
-          <p>Where providers transfer data outside the European Economic Area, this takes place with the safeguards provided for in Articles 44 et seq. of the GDPR (e.g. standard contractual clauses).</p>
-          <h2>7. Your rights</h2>
-          <p>You have the right of access, rectification, erasure, restriction, portability and objection, and to withdraw your consent at any time, by writing to {site.contact.email} or to the PEC address. You also have the right to lodge a complaint with the Italian data protection authority (Garante per la protezione dei dati personali, <a href="https://www.garanteprivacy.it" rel="noopener noreferrer" target="_blank">garanteprivacy.it</a>).</p>
-          <h2>8. Nature of the provision of data</h2>
-          <p>Providing the data marked as mandatory is necessary to reply to your request; if you do not provide them, we will not be able to follow up on the request.</p>
-          <h2>9. Cookies</h2>
+          <p>Processing complies with Regulation (EU) 2016/679 and Italian Legislative Decree 196/2003 (Personal Data Protection Code) as amended by Legislative Decree 101/2018.</p>
+          <h2>5. Professional secrecy and confidentiality</h2>
+          <p>The professionals are bound by professional secrecy and confidentiality under the <em>Italian Psychologists’ Code of Ethics</em> (<em>Codice Deontologico degli Psicologi Italiani</em>, in particular Arts. 11 and 12) and, for the pedagogical work, the ethics of their profession. Information is not disclosed to third parties except with the data subject’s consent or where required by law.</p>
+          <h2>6. Retention</h2>
+          <p>Requests not followed by an engagement are kept for the time needed to reply and, as a rule, no longer than 12 months. Data relating to professional services are kept for the periods required by law (e.g. 10 years for tax records). <em>Periods to be confirmed during legal review.</em></p>
+          <h2>7. Recipients, processors and transfers</h2>
+          <p>Data are not disclosed. They may be processed, as data processors, by technical service providers: website hosting (GitHub Pages, GitHub Inc./Microsoft), email, an optional form-collection service and a video-consultation platform. <em>List the providers actually used.</em></p>
+          <p>If a provider transfers data outside the European Economic Area (e.g. the United States), this takes place with the safeguards of Arts. 44 ff. GDPR (adequacy decision, where applicable, or standard contractual clauses).</p>
+          <h2>8. Your rights (Arts. 15–22 GDPR)</h2>
+          <p>You may at any time exercise your rights of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction (Art. 18), portability (Art. 20), objection (Art. 21) and not to be subject to decisions based solely on automated processing (Art. 22), and withdraw your consent, by writing to {site.contact.email} or to the PEC address {site.contact.pec}.</p>
+          <p>You also have the right to lodge a complaint with the <strong>Italian data protection authority (Garante per la protezione dei dati personali)</strong> (<a href="https://www.garanteprivacy.it" rel="noopener noreferrer" target="_blank">garanteprivacy.it<span class="sr-only">{t.common.newTab}</span></a>).</p>
+          <h2>9. Nature of the provision of data</h2>
+          <p>Providing the data marked as mandatory is necessary to answer your request; otherwise we cannot follow it up.</p>
+          <h2>10. Cookies</h2>
           <p>For information on cookies see the <a href={l('/cookie')}>Cookie Policy</a>.</p>
-          <p class="text-sm text-slate-600">Last updated: to be defined at publication.</p>
+          <p class="text-sm text-slate-600">Draft notice: <strong>subject to legal review</strong> before publication. Last updated: to be defined.</p>
         </>
       )}
     </div>

@@ -1,5 +1,5 @@
 ---
-// Granular cookie consent. The site sets no analytics or marketing cookies by default;
+// Granular cookie consent (necessary / functional / external). The site sets no optional cookies by default;
 // the categories exist so that any future tool is loaded ONLY after explicit opt-in
 // (listen for the `psycoped:consent` event on `window`).
 import { i18n } from '../i18n';
@@ -31,12 +31,12 @@ const c = t.cookieBanner;
         <span><strong>{c.necessary}</strong><br /><span class="hint">{c.necessaryHint}</span></span>
       </label>
       <label class="flex items-start gap-3">
-        <input type="checkbox" name="analytics" class="mt-1.5 h-5 w-5" />
-        <span><strong>{c.analytics}</strong><br /><span class="hint">{c.analyticsHint}</span></span>
+        <input type="checkbox" name="functional" class="mt-1.5 h-5 w-5" />
+        <span><strong>{c.functional}</strong><br /><span class="hint">{c.functionalHint}</span></span>
       </label>
       <label class="flex items-start gap-3">
-        <input type="checkbox" name="media" class="mt-1.5 h-5 w-5" />
-        <span><strong>{c.media}</strong><br /><span class="hint">{c.mediaHint}</span></span>
+        <input type="checkbox" name="external" class="mt-1.5 h-5 w-5" />
+        <span><strong>{c.external}</strong><br /><span class="hint">{c.externalHint}</span></span>
       </label>
     </fieldset>
     <div class="flex flex-wrap justify-end gap-3">
@@ -48,7 +48,7 @@ const c = t.cookieBanner;
 
 <script>
   const KEY = 'psycoped-consent';
-  type Consent = { analytics: boolean; media: boolean; ts: number };
+  type Consent = { necessary: true; functional: boolean; external: boolean; ts: number };
 
   const banner = document.getElementById('cookie-banner') as HTMLElement;
   const dialog = document.getElementById('cookie-dialog') as HTMLDialogElement;
@@ -70,8 +70,8 @@ const c = t.cookieBanner;
 
   const openSettings = () => {
     const c = read();
-    (form.elements.namedItem('analytics') as HTMLInputElement).checked = !!c?.analytics;
-    (form.elements.namedItem('media') as HTMLInputElement).checked = !!c?.media;
+    (form.elements.namedItem('functional') as HTMLInputElement).checked = !!c?.functional;
+    (form.elements.namedItem('external') as HTMLInputElement).checked = !!c?.external;
     dialog.showModal();
   };
 
@@ -79,12 +79,12 @@ const c = t.cookieBanner;
     const t = e.target as HTMLElement;
     if (t.closest('[data-open-cookie-settings]')) openSettings();
     const choice = t.closest<HTMLElement>('[data-consent]')?.dataset.consent;
-    if (choice === 'all') save({ analytics: true, media: true });
-    if (choice === 'reject') save({ analytics: false, media: false });
+    if (choice === 'all') save({ necessary: true, functional: true, external: true });
+    if (choice === 'reject') save({ necessary: true, functional: false, external: false });
   });
   document.getElementById('cookie-cancel')?.addEventListener('click', () => dialog.close());
   form.addEventListener('submit', () => {
     const data = new FormData(form);
-    save({ analytics: data.has('analytics'), media: data.has('media') });
+    save({ necessary: true, functional: data.has('functional'), external: data.has('external') });
   });
 </script>

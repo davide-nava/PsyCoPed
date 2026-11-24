@@ -4,7 +4,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import { site } from '../config/site';
-import { i18n, locales, localePath, stripLocale, bcp47, ogLocale, type Locale } from '../i18n';
+import { i18n, locales, stripLocale, ogLocale, type Locale } from '../i18n';
+import { publicAsset, stripBase, switchLocalePath } from '../utils/url';
 import { practiceSchema, websiteSchema, webPageSchema, breadcrumbSchema } from '../lib/schema';
 
 interface Props {
@@ -20,23 +21,24 @@ interface Props {
 }
 
 const { title, description, crumbs = [], schemas = [], noindex = false, pageType = 'WebPage', rawTitle = false } = Astro.props;
-const { locale, t } = i18n(Astro);
-const fullPath = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
-/** Path without the locale prefix: identical across languages. */
-const path = stripLocale(fullPath);
-const abs = (loc: Locale) => new URL(localePath(loc, path) === '/' ? '' : localePath(loc, path), site.url).href;
-const canonical = abs(locale);
+const { locale, t, l } = i18n(Astro);
+const pathname = Astro.url.pathname;
+/** Locale-less route (Italian slug), used to detect the home page. */
+const path = stripLocale(stripBase(import.meta.env.BASE_URL, pathname).replace(/(.)\/$/, '$1'));
+const toAbsolute = (p: string) => new URL(p, Astro.site).toString();
+const canonical = toAbsolute(pathname);
+const alternate = (loc: Locale) => toAbsolute(switchLocalePath(pathname, loc));
 const otherLocales = locales.filter((l) => l !== locale);
 const suffix = ` | ${site.name}`;
 // Keep <title> within ~60 chars: append the brand only when it fits.
 const fullTitle = rawTitle || title.length + suffix.length > 62 || title.includes(site.name) ? title : title + suffix;
-const image = new URL('/og-image.png', site.url).href;
+const image = toAbsolute(publicAsset('og-image.png'));
 const isHome = path === '/';
 const jsonLd = [
   practiceSchema(locale),
   ...(isHome ? [websiteSchema(locale)] : []),
   webPageSchema({ type: pageType, url: canonical, name: fullTitle, description, locale }),
-  ...(crumbs.length ? [breadcrumbSchema([{ name: t.common.home, href: localePath(locale, '/') }, ...crumbs])] : []),
+  ...(crumbs.length ? [breadcrumbSchema([{ name: t.common.home, href: l('/') }, ...crumbs])] : []),
   ...schemas,
 ];
 ---
@@ -49,9 +51,9 @@ const jsonLd = [
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {locales.map((l) => <link rel="alternate" hreflang={bcp47[l]} href={abs(l)} />)}
-    <link rel="alternate" hreflang="x-default" href={abs('it')} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {locales.map((l) => <link rel="alternate" hreflang={l} href={alternate(l)} />)}
+    <link rel="alternate" hreflang="x-default" href={alternate('it')} />
+    <link rel="icon" href={publicAsset('favicon.svg')} type="image/svg+xml" />
     <meta name="theme-color" content="#1e3a4c" />
     <meta name="author" content="Studio PsyCoPed" />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
@@ -76,7 +78,7 @@ const jsonLd = [
   </head>
   <body class="flex min-h-screen flex-col">
     <a href="#main" class="skip-link">{t.common.skipToContent}</a>
-    <Header currentPath={path} />
+    <Header />
     <main id="main" class="flex-1">
       <slot />
     </main>

@@ -16,10 +16,11 @@ npm run build    # static site in dist/
 | `src/i18n/` | UI dictionaries (`it.ts` is the source of truth, `en.ts` is typed against it), locale helpers (`localePath`, `i18n(Astro)`) |
 | `src/config/site.ts` | Address, contacts, professionals, nav, opening hours, endpoints |
 | `src/data/` | Services, FAQ, publications/artistic content |
-| `src/lib/availability.ts` | **Sample** agenda generator (swap for Cal.com / Google Calendar / custom API) |
+| `src/data/agenda.ts` | Professionals, schedule, holidays, occupied slots, `getAvailableSlotsForDate()` (optional runtime feed via `PUBLIC_AGENDA_FEED_URL`) |
+| `src/utils/url.ts`, `src/utils/ics.ts` | Base-path/locale URL helpers; RFC 5545 `.ics` booking reminder |
 | `src/lib/validation.ts` | Validation shared by browser and server |
 | `src/lib/schema.ts` | JSON-LD: `MedicalBusiness`/`Psychologist`, `Person`, `FAQPage`, `BreadcrumbList` |
-| `src/lib/server.ts` + `functions/api/*` | Contact/booking handler (Web-standard; Cloudflare Pages Functions entry points) |
+| `src/lib/submit.ts` | Browser POST helper with timeout for optional external endpoints |
 | `src/components/BookingWidget.astro` | 5-step booking flow (`/prenota`) |
 | `src/components/ContactForm.astro` | Accessible contact form (`/contatti`) |
 | `src/components/CookieBanner.astro` | Granular consent; emits `psycoped:consent` on `window` |
@@ -30,9 +31,9 @@ Routes: `/`, `/chi-sono`, `/servizi`, `/servizi/[slug]`, `/come-funziona`, `/pre
 
 ## Connecting the backends
 
-- **Forms:** set `NOTIFY_WEBHOOK_URL` (or implement `deliver()` in `src/lib/server.ts` with your email provider). If the endpoint is unreachable, the UI falls back to `mailto:` / PEC / phone links. Add rate limiting/CAPTCHA (e.g. Turnstile) before launch.
+- **Forms (static hosting, no server):** optionally set `PUBLIC_CONTACT_ENDPOINT` / `PUBLIC_BOOKING_ENDPOINT` (Formspree, Web3Forms, webhook) at build time, see `.env.example`. Without an endpoint, or if it fails, the UI shows a fallback card (mailto, copyable summary, PEC, phone/WhatsApp). Never put secrets in `PUBLIC_*` variables; use the provider's anti-spam/CAPTCHA.
 - **Agenda:** return an `AvailabilityMap` (`{ professionalId: { 'YYYY-MM-DD': ['HH:MM'] } }`) from a real provider at build time, or fetch it client-side in `BookingWidget.astro`.
-- **Angular alternative:** `validation.ts`, `availability.ts`, `submit.ts` and the data files are framework-free; port the two `<script>` blocks to Angular components (signals + reactive forms) and keep the rest of the site in Astro.
+- **Angular alternative:** `validation.ts`, `agenda.ts`, `submit.ts` and the data files are framework-free; port the two `<script>` blocks to Angular components (signals + reactive forms) and keep the rest of the site in Astro.
 
 ## Pre-launch checklist (to verify / complete)
 

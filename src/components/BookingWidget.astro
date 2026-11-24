@@ -1,7 +1,6 @@
 ---
 import { site, getProfessionals } from '../config/site';
-import { getBookingServices } from '../data/services';
-import { getAvailability } from '../lib/availability';
+import { bookingServices } from '../data/agenda';
 import { i18n, bcp47 } from '../i18n';
 
 interface Props { presetService?: string }
@@ -9,18 +8,16 @@ const { presetService = '' } = Astro.props;
 const { locale, t, l } = i18n(Astro);
 const b = t.booking;
 const professionals = getProfessionals(locale);
-const bookingServices = getBookingServices(locale);
+const services = bookingServices.map((s) => ({ id: s.id as string, minutes: s.minutes as number, label: s.label[locale] }));
 
-// SAMPLE availability, generated at build time. Swap getAvailability() for a real provider.
-const availability = getAvailability();
-// Strings and settings needed by the client-side script.
+// Strings and settings needed by the client-side script (the agenda itself is bundled with the script).
 const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.validation };
 ---
 
-<div id="booking" class="card !p-0 overflow-hidden" data-availability={JSON.stringify(availability)}
-  data-services={JSON.stringify(bookingServices)}
+<div id="booking" class="card !p-0 overflow-hidden"
+  data-services={JSON.stringify(services)}
   data-professionals={JSON.stringify({ provini: professionals.provini.name, coccia: professionals.coccia.name })}
-  data-endpoint={site.endpoints.booking} data-preset={presetService} data-t={JSON.stringify(clientT)}>
+  data-preset={presetService} data-t={JSON.stringify(clientT)}>
 
   <div class="border-b border-amber-300 bg-amber-50 px-6 py-3 text-sm text-amber-950" role="note">
     <strong>{b.sampleStrong}</strong> {b.sampleText}
@@ -41,7 +38,7 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
       <h2 id="bk-h1" class="!text-2xl" tabindex="-1">{b.h1}</h2>
       <fieldset class="mt-5 grid gap-3">
         <legend class="sr-only">{b.legendService}</legend>
-        {bookingServices.map((s) => (
+        {services.map((s) => (
           <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-line p-4 has-[:checked]:border-teal-600 has-[:checked]:bg-sage-100">
             <input type="radio" name="service" value={s.id} class="h-5 w-5" checked={s.id === presetService} />
             <span>{s.label} <span class="text-sm text-slate-600">· {b.about} {s.minutes} {b.min}</span></span>
@@ -107,6 +104,8 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
     <section data-step="5" aria-labelledby="bk-h5" hidden>
       <h2 id="bk-h5" class="!text-2xl" tabindex="-1">{b.h5}</h2>
       <p id="bk-summary" class="mt-3 rounded-xl bg-sage-100 p-4 font-medium"></p>
+      <p class="mt-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 text-amber-950" role="note"><strong>{b.sensitiveWarning}</strong></p>
+      <p class="mt-3 rounded-xl border border-alert bg-alert-bg p-4 text-ink" role="note"><strong class="text-alert">{b.emergencyTitle}.</strong> {b.emergencyText} <a class="font-semibold text-alert" href="tel:112">{t.common.callEmergency}</a>.</p>
       <div class="mt-5 grid gap-5 sm:grid-cols-2">
         <div class="field"><label for="b-name">{b.name}</label><input id="b-name" name="name" class="input" autocomplete="name" required /><p id="b-name-err" class="field-error" hidden></p></div>
         <div class="field"><label for="b-email">{b.email}</label><input id="b-email" name="email" type="email" class="input" autocomplete="email" required /><p id="b-email-err" class="field-error" hidden></p></div>
@@ -146,39 +145,59 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
 
 <script>
   import { validateBooking, type BookingPayload } from '../lib/validation';
-  import { postJson, mailtoHref } from '../lib/submit';
+  import { submitToEndpoint, mailtoHref } from '../lib/submit';
   import { site } from '../config/site';
+  import { downloadBookingIcs } from '../utils/ics';
+  import {
+    fetchAgendaFeed,
+    getAvailableSlotsForDate,
+    agendaConfig,
+    sessionLocations,
+    toISODate,
+    type OccupiedSlot,
+    type SessionFormat,
+    type Slot,
+  } from '../data/agenda';
   import type { Dict } from '../i18n/it';
 
-  type Avail = Record<string, Record<string, string[]>>;
   const root = document.getElementById('booking') as HTMLElement;
   const form = document.getElementById('booking-form') as HTMLFormElement;
-  const avail: Avail = JSON.parse(root.dataset.availability!);
   const services: { id: string; label: string; minutes: number }[] = JSON.parse(root.dataset.services!);
   const names: Record<string, string> = JSON.parse(root.dataset.professionals!);
-  const T: { locale: string; dateLocale: string; booking: Dict['booking']; validation: Dict['validation'] } = JSON.parse(root.dataset.t!);
+  const T: { locale: 'it' | 'en'; dateLocale: string; booking: Dict['booking']; validation: Dict['validation'] } = JSON.parse(root.dataset.t!);
   const B = T.booking;
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
   const state = { step: 1, month: new Date(), date: '', time: '', resolvedPro: '' };
   state.month.setDate(1);
   const TOTAL = 5;
+  /** Occupied slots merged at runtime from PUBLIC_AGENDA_FEED_URL (empty without a feed). */
+  let feed: OccupiedSlot[] = [];
   const pad = (n: number) => String(n).padStart(2, '0');
   const iso = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
   const val = (name: string) => (form.elements.namedItem(name) as RadioNodeList | HTMLInputElement)?.value ?? '';
-  const todayISO = () => { const t = new Date(); return iso(t.getFullYear(), t.getMonth(), t.getDate()); };
   const fmtDate = (s: string) => new Date(s + 'T12:00:00').toLocaleDateString(T.dateLocale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const selectedService = () => services.find((s) => s.id === val('service'));
 
-  /** Times available for a date given the chosen professional (or union for "any"). */
-  function slotsFor(date: string): { time: string; pro: string }[] {
-    const pro = val('professional');
-    const out = new Map<string, string>();
-    for (const id of pro === 'any' ? Object.keys(avail) : [pro]) {
-      for (const t of avail[id]?.[date] ?? []) if (!out.has(t)) out.set(t, id);
-    }
-    return [...out].map(([time, p]) => ({ time, pro: p })).sort((a, b) => a.time.localeCompare(b.time));
+  /** Free slots for a date given service, format and professional (or the union for "any"). */
+  function slotsFor(date: string): Slot[] {
+    return getAvailableSlotsForDate(date, {
+      professional: (val('professional') || 'any') as 'any' | 'provini' | 'coccia',
+      format: (val('format') || undefined) as SessionFormat | undefined,
+      minutes: selectedService()?.minutes,
+      extraOccupied: feed,
+    });
   }
-  const hasSlots = (date: string) => date > todayISO() && slotsFor(date).length > 0;
+  const hasSlots = (date: string) => slotsFor(date).length > 0;
+
+  function firstAvailableDate(): string {
+    const start = new Date();
+    for (let i = 0; i <= agendaConfig.horizonDays; i++) {
+      const d = toISODate(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+      if (hasSlots(d)) return d;
+    }
+    return '';
+  }
 
   function renderCalendar() {
     const y = state.month.getFullYear(), m = state.month.getMonth();
@@ -209,22 +228,25 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
     box.innerHTML = '';
     if (!state.date) { $('slots-title').textContent = B.pickDayFirst; return; }
     $('slots-title').textContent = `${B.slotsFor} ${fmtDate(state.date)}`;
-    for (const s of slotsFor(state.date)) {
+    const slots = slotsFor(state.date);
+    if (!slots.length) { box.textContent = B.noSlots; return; }
+    for (const s of slots) {
       const b = document.createElement('button');
       b.type = 'button';
       b.setAttribute('role', 'radio');
       b.setAttribute('aria-checked', String(state.time === s.time));
       b.textContent = s.time;
       b.className = 'min-h-11 min-w-20 rounded-full border-2 px-4 font-semibold ' + (state.time === s.time ? 'border-navy-800 bg-navy-800 text-white' : 'border-teal-600 text-teal-700 hover:bg-sage-100');
-      b.addEventListener('click', () => { state.time = s.time; state.resolvedPro = s.pro; renderSlots(); });
+      b.addEventListener('click', () => { state.time = s.time; state.resolvedPro = s.professional; renderSlots(); });
       box.append(b);
     }
   }
 
+  const resolvedPro = () => (val('professional') === 'any' ? state.resolvedPro : val('professional'));
+  const formatLabel = () => (val('format') === 'online' ? B.online : B.summaryStudio);
+
   function summaryText() {
-    const svc = services.find((s) => s.id === val('service'));
-    const pro = val('professional') === 'any' ? state.resolvedPro : val('professional');
-    return `${svc?.label} · ${val('format') === 'online' ? B.online : B.summaryStudio} · ${names[pro]} · ${fmtDate(state.date)} ${B.summaryAt} ${state.time}`;
+    return `${selectedService()?.label} · ${formatLabel()} · ${names[resolvedPro()]} · ${fmtDate(state.date)} ${B.summaryAt} ${state.time}`;
   }
 
   function showError(msg: string) {
@@ -247,7 +269,7 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
     if (step === 4) {
       // jump to the month of the first available day
       if (!state.date) {
-        const first = Object.keys(avail).flatMap((id) => (val('professional') === 'any' || val('professional') === id ? Object.keys(avail[id]) : [])).filter(hasSlots).sort()[0];
+        const first = firstAvailableDate();
         if (first) state.month = new Date(Number(first.slice(0, 4)), Number(first.slice(5, 7)) - 1, 1);
       }
       renderCalendar(); renderSlots();
@@ -272,18 +294,88 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
   });
   $('bk-back').addEventListener('click', () => go(state.step - 1));
   form.addEventListener('change', (e) => {
-    if ((e.target as HTMLInputElement).name === 'professional') { state.date = ''; state.time = ''; }
+    const name = (e.target as HTMLInputElement).name;
+    if (name === 'professional' || name === 'format' || name === 'service') { state.date = ''; state.time = ''; }
   });
   $('cal-prev').addEventListener('click', () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() - 1, 1); renderCalendar(); });
   $('cal-next').addEventListener('click', () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 1); renderCalendar(); });
+
+  /** Plain-text summary used for the mailto body and the clipboard. */
+  function requestText(payload: BookingPayload) {
+    return [
+      summaryText(),
+      '',
+      `${B.mailName}: ${payload.name}`,
+      `${B.mailEmail}: ${payload.email}`,
+      `${B.mailPhone}: ${payload.phone}`,
+      payload.note ? `${B.mailNote}: ${payload.note}` : '',
+    ].filter((line, i, all) => line || all[i - 1] !== '').join('\n');
+  }
+
+  const make = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '', className = '') => {
+    const node = document.createElement(tag);
+    node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+  const makeLink = (href: string, text: string, className = '') => {
+    const a = make('a', text, className);
+    a.href = href;
+    return a;
+  };
+
+  function showDone(payload: BookingPayload, sent: { ok: boolean; reason?: string }) {
+    const body = $('done-body');
+    body.replaceChildren();
+    const text = requestText(payload);
+    body.append(make('p', summaryText(), 'rounded-xl bg-sage-100 p-4 font-medium'));
+
+    if (sent.ok) {
+      body.append(make('p', `${B.thanks} ${payload.name}${B.received}`));
+    } else {
+      const message = sent.reason === 'no-endpoint' ? B.noEndpointText : sent.reason === 'timeout' ? B.timeoutText : B.failText;
+      body.append(make('p', message));
+      const actions = make('div', '', 'flex flex-wrap items-center gap-3');
+      const mail = makeLink(mailtoHref(site.contact.email, B.mailSubject, text), B.sendByEmail, 'btn btn-primary');
+      const copy = make('button', B.copySummary, 'btn btn-secondary');
+      copy.type = 'button';
+      const copied = make('span', '', 'text-sm');
+      copied.setAttribute('role', 'status');
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(text); copied.textContent = B.copied; }
+        catch { copied.textContent = ''; }
+      });
+      actions.append(mail, copy, copied);
+      const contacts = make('ul', '', 'space-y-1');
+      const add = (label: string, a: HTMLAnchorElement) => { const li = make('li', `${label}: `); li.append(a); contacts.append(li); };
+      add(B.mailEmail, makeLink(`mailto:${site.contact.email}`, site.contact.email));
+      add(B.pecLabel, makeLink(`mailto:${site.contact.pec}`, site.contact.pec));
+      add(B.phoneLabel, makeLink(`tel:${site.contact.phoneRaw}`, site.contact.phone));
+      body.append(actions, contacts);
+    }
+
+    const ics = make('button', B.downloadIcs, 'btn btn-secondary');
+    ics.type = 'button';
+    ics.addEventListener('click', () => downloadBookingIcs({
+      date: payload.date,
+      time: payload.time,
+      durationMinutes: selectedService()?.minutes ?? agendaConfig.sessionMinutes,
+      serviceLabel: selectedService()?.label ?? '',
+      professionalName: names[payload.professional] ?? '',
+      formatLabel: formatLabel(),
+      location: sessionLocations[payload.format][T.locale],
+      labels: { summary: B.icsSummary, pendingNotice: B.icsPending, service: B.icsService, professional: B.icsProfessional, format: B.icsFormat },
+    }));
+    body.append(ics, make('p', B.icsHint, 'text-sm text-slate-600'));
+    form.hidden = true; $('booking-done').hidden = false; $('booking-done').focus();
+  }
 
   const errId: Record<string, string> = { name: 'b-name', email: 'b-email', phone: 'b-phone', note: 'b-note', policy: 'b-policy', consent: 'b-consent' };
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = new FormData(form);
-    const pro = (val('professional') === 'any' ? state.resolvedPro : val('professional')) as BookingPayload['professional'];
     const payload: BookingPayload = {
-      service: val('service'), format: val('format') as BookingPayload['format'], professional: pro,
+      service: val('service'), format: val('format') as BookingPayload['format'], professional: resolvedPro() as BookingPayload['professional'],
       date: state.date, time: state.time, name: String(d.get('name') || ''), email: String(d.get('email') || ''),
       phone: String(d.get('phone') || ''), note: String(d.get('note') || ''), consent: d.has('consent'), policy: d.has('policy'),
       website: String(d.get('website') || ''), locale: T.locale,
@@ -302,43 +394,34 @@ const clientT = { locale, dateLocale: bcp47[locale], booking: b, validation: t.v
       form.querySelector<HTMLElement>(`[name="${keys[0]}"]`)?.focus();
       return;
     }
-    if (payload.website) return;
+    if (payload.website) return; // honeypot filled: bot
     const btn = $('bk-submit') as HTMLButtonElement;
     btn.disabled = true; btn.textContent = B.sending;
-    const res = await postJson(root.dataset.endpoint!, payload);
+    const { website: _honeypot, ...data } = payload;
+    const result = await submitToEndpoint(site.endpoints.booking, { ...data, summary: summaryText() });
     btn.disabled = false; btn.textContent = B.submit;
-
-    const body = $('done-body');
-    body.innerHTML = '';
-    const p1 = document.createElement('p');
-    p1.className = 'rounded-xl bg-sage-100 p-4 font-medium';
-    p1.textContent = summaryText();
-    const p2 = document.createElement('p');
-    if (res.ok) {
-      p2.textContent = `${B.thanks} ${payload.name}${B.received}`;
-    } else {
-      p2.append(B.failText);
-      const a = document.createElement('a');
-      a.href = mailtoHref(site.contact.email, B.mailSubject, `${summaryText()}\n\n${B.mailName}: ${payload.name}\n${B.mailPhone}: ${payload.phone}\n${B.mailEmail}: ${payload.email}\n${B.mailNote}: ${payload.note}`);
-      a.textContent = B.failEmail;
-      p2.append(a, ` ${B.failCall} ${site.contact.phone}.`);
-    }
-    body.append(p1, p2);
-    form.hidden = true; $('booking-done').hidden = false; $('booking-done').focus();
+    showDone(payload, result);
   });
 
   $('bk-restart').addEventListener('click', () => {
     form.reset(); state.date = ''; state.time = ''; form.hidden = false; $('booking-done').hidden = true; go(1);
   });
 
-  // Preset from /prenota?servizio=...
-  const preset = new URLSearchParams(location.search).get('servizio') || root.dataset.preset;
+  // Presets from the URL (service and professional ids only: never personal data).
+  const params = new URLSearchParams(location.search);
+  const preset = params.get('servizio') || root.dataset.preset;
   if (preset && services.some((s) => s.id === preset)) {
     (form.querySelector(`input[name=service][value="${preset}"]`) as HTMLInputElement | null)?.click();
   }
-  const presetPro = new URLSearchParams(location.search).get('professional');
+  const presetPro = params.get('professional');
   if (presetPro && names[presetPro]) {
     (form.querySelector(`input[name=professional][value="${presetPro}"]`) as HTMLInputElement | null)?.click();
   }
   go(1, false);
+
+  // Optional runtime merge of occupied slots; the static agenda is used when the feed is missing or fails.
+  fetchAgendaFeed(site.endpoints.agendaFeed).then((slots) => {
+    feed = slots;
+    if (state.step === 4) { renderCalendar(); renderSlots(); }
+  });
 </script>

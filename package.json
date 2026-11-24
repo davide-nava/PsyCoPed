@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test:i18n": "node scripts/test-i18n.mjs"
+    "test:i18n": "node scripts/test-i18n.mjs",
+    "test:url": "node scripts/test-url.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",

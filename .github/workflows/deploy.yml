@@ -40,6 +40,9 @@ jobs:
         run: npm run test:i18n
 
       # Controllo statico dei tipi TypeScript e Astro tramite dipendenza locale preinstallata
+      - name: Unit checks (URL helpers, ICS, agenda)
+        run: npm run test:url
+
       - name: Typecheck Astro & TypeScript
         run: npm run check
 

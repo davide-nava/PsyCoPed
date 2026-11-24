@@ -6,7 +6,7 @@ import type { Locale } from '../i18n';
  */
 export const site = {
   name: 'Studio PsyCoPed',
-  url: 'https://www.studiopsycoped.it', // VERIFY: production domain
+  url: 'https://davide-nava.github.io/PsyCoPed/', // fallback only: the deployed origin comes from `site` in astro.config.mjs
   address: {
     street: 'Via Provinciale, 43',
     postalCode: '21030',
@@ -30,10 +30,15 @@ export const site = {
     vatNumber: 'DA COMPLETARE',
     fiscalCode: 'DA COMPLETARE',
   },
-  /** Endpoints that receive contact/booking requests (see functions/api). */
+  /**
+   * Optional external endpoints (Formspree, Web3Forms, custom webhook) injected at build time.
+   * The site is fully static: when empty, forms fall back to mailto: and the contact card.
+   */
   endpoints: {
-    contact: '/api/contact',
-    booking: '/api/booking',
+    contact: import.meta.env.PUBLIC_CONTACT_ENDPOINT || '',
+    booking: import.meta.env.PUBLIC_BOOKING_ENDPOINT || import.meta.env.PUBLIC_CONTACT_ENDPOINT || '',
+    /** Optional JSON feed with already-booked slots, merged at runtime (see src/data/agenda.ts). */
+    agendaFeed: import.meta.env.PUBLIC_AGENDA_FEED_URL || '',
   },
   /** Opening hours used for structured data. VERIFY with the practice. */
   openingHours: [
