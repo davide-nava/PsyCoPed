@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import ContactForm from '../components/ContactForm.astro';
+import EmergencyNotice from '../components/EmergencyNotice.astro';
+import { site, professionals } from '../config/site';
+const crumbs = [{ name: 'Contatti', href: '/contatti' }];
+---
+
+<BaseLayout title="Contatti e richiesta informazioni"
+  pageType="ContactPage" description="Contatta lo Studio PsyCoPed in Via Provinciale 43, Cremenaga (VA): modulo di richiesta, telefono, WhatsApp, Telegram, email e PEC." crumbs={crumbs}>
+  <PageHeader title="Contatti" lead="Scrivici per informazioni o per fissare un primo colloquio." crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1.4fr_1fr]">
+      <div>
+        <h2 class="mb-6 !text-3xl">Richiedi informazioni</h2>
+        <ContactForm />
+      </div>
+      <div class="space-y-6">
+        <EmergencyNotice />
+        <div class="card">
+          <h2 class="!text-2xl">Recapiti diretti</h2>
+          <address class="mt-4 space-y-2 not-italic">
+            <p>{site.address.full}</p>
+            <p>{professionals.provini.name}<br /><a href={`tel:${professionals.provini.phoneRaw}`}>{professionals.provini.phone}</a> (anche WhatsApp / Telegram)</p>
+            <p>{professionals.coccia.name}<br /><a href={`tel:${professionals.coccia.phoneRaw}`}>{professionals.coccia.phone}</a></p>
+            <p>Email: <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></p>
+            <p>PEC: <a href={`mailto:${site.contact.pec}`}>{site.contact.pec}</a></p>
+          </address>
+          <p class="mt-4"><a href={site.address.mapsUrl} target="_blank" rel="noopener noreferrer">Apri su Google Maps<span class="sr-only"> (nuova scheda)</span></a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Preselect the service from ?servizio=
+  const wanted = new URLSearchParams(location.search).get('servizio');
+  const select = document.getElementById('c-subject') as HTMLSelectElement | null;
+  if (wanted && select) {
+    const opt = [...select.options].find((o) => o.value === wanted);
+    if (opt) select.value = opt.value;
+  }
+</script>

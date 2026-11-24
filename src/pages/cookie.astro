@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import DraftBanner from '../components/DraftBanner.astro';
+const crumbs = [{ name: 'Cookie Policy', href: '/cookie' }];
+const rows = [
+  ['psycoped-consent', 'Necessario', 'Memorizza le preferenze cookie (localStorage)', 'Fino a revoca'],
+  ['Statistiche', 'Previo consenso', 'Nessuno strumento attualmente attivo', '—'],
+  ['Contenuti di terze parti', 'Previo consenso', 'Video incorporati (es. YouTube), quando presenti', 'Secondo il fornitore'],
+];
+---
+
+<BaseLayout title="Cookie Policy" description="Informazioni sui cookie e gestione granulare delle preferenze." crumbs={crumbs}>
+  <PageHeader title="Cookie Policy" lead="Come usiamo cookie e tecnologie simili, e come gestire le tue preferenze." crumbs={crumbs} />
+  <section class="section"><div class="container-page">
+    <DraftBanner />
+    <div class="prose-clinic">
+      <h2>Cosa sono i cookie</h2>
+      <p>I cookie sono piccoli file di testo (o tecnologie analoghe, come il localStorage) memorizzati sul dispositivo per far funzionare il sito o raccogliere informazioni.</p>
+      <h2>Categorie</h2>
+      <ul>
+        <li><strong>Necessari:</strong> indispensabili al funzionamento; non richiedono consenso.</li>
+        <li><strong>Statistiche:</strong> misurazione delle visite; attivi solo con consenso.</li>
+        <li><strong>Contenuti di terze parti:</strong> servizi esterni che possono impostare propri cookie; attivi solo con consenso.</li>
+      </ul>
+      <p>Il sito non usa font o script esterni per default e non utilizza cookie di profilazione.</p>
+    </div>
+    <div class="my-8 overflow-x-auto">
+      <table class="w-full min-w-[36rem] border border-line bg-white text-left text-base">
+        <caption class="p-3 text-left font-semibold">Elenco cookie e tecnologie</caption>
+        <thead class="bg-sage-100"><tr><th scope="col" class="p-3">Nome / categoria</th><th scope="col" class="p-3">Tipo</th><th scope="col" class="p-3">Finalità</th><th scope="col" class="p-3">Durata</th></tr></thead>
+        <tbody>{rows.map((r) => <tr class="border-t border-line">{r.map((c, i) => i === 0 ? <th scope="row" class="p-3 font-medium">{c}</th> : <td class="p-3">{c}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+    <div class="prose-clinic">
+      <h2>Gestisci le preferenze</h2>
+      <p>Puoi modificare o revocare il consenso in qualsiasi momento.</p>
+      <button type="button" class="btn btn-primary" data-open-cookie-settings>Apri le preferenze cookie</button>
+      <p>Puoi inoltre gestire i cookie dalle impostazioni del browser. Titolare del trattamento e diritti: vedi l’<a href="/privacy">Informativa Privacy</a>.</p>
+    </div>
+  </div></section>
+</BaseLayout>

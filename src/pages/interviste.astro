@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { interviews } from '../data/content';
+const crumbs = [{ name: 'Interviste', href: '/interviste' }];
+---
+
+<BaseLayout title="Interviste" description="Interviste e interventi sui media del Dott. Mirko Provini, psicologo clinico dello Studio PsyCoPed a Cremenaga (VA)." crumbs={crumbs} noindex={interviews.length === 0}>
+  <PageHeader title="Interviste" lead="Interventi e interviste sui media." crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page max-w-4xl">
+      {interviews.length === 0 ? (
+        <p class="card">Le interviste sono in corso di migrazione dal sito precedente. Per richieste stampa scrivi a <a href="/contatti">contatti</a>.</p>
+      ) : (
+        <ul class="space-y-5">
+          {interviews.map((i) => (
+            <li class="card"><h2 class="!text-xl">{i.title}</h2>{i.description && <p class="mt-2">{i.description}</p>}{i.url && <a href={i.url} rel="noopener noreferrer" target="_blank">Apri</a>}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+</BaseLayout>

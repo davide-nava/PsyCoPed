@@ -1,2 +1,43 @@
-# PsyCoPed
-PsyCoPed
+# Studio PsyCoPed — sito unificato
+
+Astro 7 + TypeScript + Tailwind CSS 4. Static output, vanilla-TS interactive islands (no framework runtime), Italian copy, English code.
+
+```bash
+npm install
+npm run dev      # http://localhost:4321
+npm run check    # type check
+npm run build    # static site in dist/
+```
+
+## Structure
+
+| Path | Purpose |
+|---|---|
+| `src/config/site.ts` | Address, contacts, professionals, nav, opening hours, endpoints |
+| `src/data/` | Services, FAQ, publications/artistic content |
+| `src/lib/availability.ts` | **Sample** agenda generator (swap for Cal.com / Google Calendar / custom API) |
+| `src/lib/validation.ts` | Validation shared by browser and server |
+| `src/lib/schema.ts` | JSON-LD: `MedicalBusiness`/`Psychologist`, `Person`, `FAQPage`, `BreadcrumbList` |
+| `src/lib/server.ts` + `functions/api/*` | Contact/booking handler (Web-standard; Cloudflare Pages Functions entry points) |
+| `src/components/BookingWidget.astro` | 5-step booking flow (`/prenota`) |
+| `src/components/ContactForm.astro` | Accessible contact form (`/contatti`) |
+| `src/components/CookieBanner.astro` | Granular consent; emits `psycoped:consent` on `window` |
+
+Routes: `/`, `/chi-sono`, `/servizi`, `/servizi/[slug]`, `/come-funziona`, `/prenota`, `/contatti`, `/pubblicazioni`, `/interviste`, `/vocal-coach`, `/privacy`, `/cookie`, `/note-legali`.
+
+## Connecting the backends
+
+- **Forms:** set `NOTIFY_WEBHOOK_URL` (or implement `deliver()` in `src/lib/server.ts` with your email provider). If the endpoint is unreachable, the UI falls back to `mailto:` / PEC / phone links. Add rate limiting/CAPTCHA (e.g. Turnstile) before launch.
+- **Agenda:** return an `AvailabilityMap` (`{ professionalId: { 'YYYY-MM-DD': ['HH:MM'] } }`) from a real provider at build time, or fetch it client-side in `BookingWidget.astro`.
+- **Angular alternative:** `validation.ts`, `availability.ts`, `submit.ts` and the data files are framework-free; port the two `<script>` blocks to Angular components (signals + reactive forms) and keep the rest of the site in Astro.
+
+## Pre-launch checklist (to verify / complete)
+
+1. Production domain (`astro.config.mjs`, `site.ts`, `robots.txt`).
+2. **Partita IVA, codice fiscale**, fee schedule, professional liability insurance (`site.ts`, `/note-legali`).
+3. Dott.ssa Coccia's Albo registration number and bio details (only title and phone were available).
+4. Opening hours, session durations, cancellation policy (24 h is a sample), real availability.
+5. Legacy content still to migrate: publications, interviews, Vocal Coach bio (ENG), videos, discography, music projects (`src/data/content.ts`). The legacy sites were not scraped; content came from the project brief.
+6. Privacy / Cookie / Note legali are **drafts**: have them reviewed by legal counsel / DPO; list actual processors; remove `DraftBanner`.
+7. Telepsychology consent wording and the video-call provider.
+8. Add real photos, OG image, and test with a screen reader and Lighthouse.

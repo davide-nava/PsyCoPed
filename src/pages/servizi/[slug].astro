@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { services, serviceSeo, type Service } from '../../data/services';
+import { serviceSchema } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+const { service } = Astro.props as { service: Service };
+const seo = serviceSeo[service.slug];
+const crumbs = [{ name: 'Servizi', href: '/servizi' }, { name: service.title, href: `/servizi/${service.slug}` }];
+---
+
+<BaseLayout title={seo.title} description={seo.description} crumbs={crumbs} schemas={[serviceSchema({ title: service.title, description: seo.description, slug: service.slug })]}>
+  <PageHeader title={service.title} lead={service.intro} crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1fr_20rem]">
+      <div class="prose-clinic">
+        {service.sections.map((s) => (
+          <>
+            <h2>{s.heading}</h2>
+            {s.paragraphs?.map((p) => <p>{p}</p>)}
+            {s.items && (s.heading.startsWith('Le tre fasi') ? <ol>{s.items.map((i) => <li>{i}</li>)}</ol> : <ul>{s.items.map((i) => <li>{i}</li>)}</ul>)}
+          </>
+        ))}
+        <h2>Cosa aspettarsi dal primo incontro</h2>
+        <p>{service.firstSession}</p>
+      </div>
+      <aside class="card h-fit bg-sage-100 lg:sticky lg:top-24">
+        <h2 class="!text-xl">Prenota o chiedi informazioni</h2>
+        <p class="mt-2 text-sm">In studio a Cremenaga (VA) o online.</p>
+        <a class="btn btn-primary mt-4 w-full" href={`/prenota?servizio=${service.bookingId}`}>Prenota una seduta</a>
+        <a class="btn btn-secondary mt-3 w-full" href={`/contatti?servizio=${encodeURIComponent(service.title)}`}>Richiedi informazioni</a>
+        <p class="mt-4 text-sm"><a href="/servizi">← Tutti i servizi</a></p>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

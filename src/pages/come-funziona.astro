@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import FaqList from '../components/FaqList.astro';
+import EmergencyNotice from '../components/EmergencyNotice.astro';
+import { faqs } from '../data/faq';
+import { faqSchema } from '../lib/schema';
+const crumbs = [{ name: 'Come funziona', href: '/come-funziona' }];
+const steps = [
+  ['Contatto', 'Prenoti online o ci contatti per telefono, WhatsApp, Telegram o email.'],
+  ['Primo colloquio', 'Conoscenza reciproca, analisi della richiesta e definizione degli obiettivi.'],
+  ['Percorso', 'Incontri periodici, in studio o online, con la tua partecipazione attiva.'],
+  ['Verifica', 'Si valutano insieme i progressi e si decide come proseguire.'],
+];
+---
+
+<BaseLayout title="Primo colloquio, costi e domande frequenti" description="Come si svolge il primo colloquio psicologico, sedute online e in studio, riservatezza, disdetta e costi: le risposte alle domande più frequenti."
+  crumbs={crumbs} schemas={[faqSchema(faqs)]}>
+  <PageHeader title="Come funziona" lead="Cosa aspettarsi dal primo contatto e risposte alle domande più comuni." crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page">
+      <ol class="grid gap-6 md:grid-cols-4">
+        {steps.map(([t, d], i) => (
+          <li class="card"><span class="font-serif text-3xl text-teal-600">{i + 1}</span><h2 class="!text-xl">{t}</h2><p class="mt-2 text-slate-700">{d}</p></li>
+        ))}
+      </ol>
+      <div class="mt-12"><EmergencyNotice /></div>
+      <h2 class="mb-6 mt-14">Domande frequenti</h2>
+      <FaqList items={faqs} />
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a class="btn btn-primary" href="/prenota">Prenota una seduta</a>
+        <a class="btn btn-secondary" href="/contatti">Richiedi informazioni</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

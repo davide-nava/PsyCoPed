@@ -1,0 +1,335 @@
+---
+import { site, professionals } from '../config/site';
+import { bookingServices } from '../data/services';
+import { getAvailability } from '../lib/availability';
+
+interface Props { presetService?: string }
+const { presetService = '' } = Astro.props;
+
+// SAMPLE availability, generated at build time. Swap getAvailability() for a real provider.
+const availability = getAvailability();
+const steps = ['Servizio', 'Modalità', 'Professionista', 'Data e ora', 'I tuoi dati'];
+---
+
+<div id="booking" class="card !p-0 overflow-hidden" data-availability={JSON.stringify(availability)}
+  data-services={JSON.stringify(bookingServices)}
+  data-professionals={JSON.stringify({ provini: professionals.provini.name, coccia: professionals.coccia.name })}
+  data-endpoint={site.endpoints.booking} data-preset={presetService}>
+
+  <div class="border-b border-amber-300 bg-amber-50 px-6 py-3 text-sm text-amber-950" role="note">
+    <strong>Disponibilità di esempio.</strong> Gli orari mostrati sono indicativi e configurabili: la richiesta viene confermata dallo studio via email o telefono.
+  </div>
+
+  <ol class="flex flex-wrap gap-2 border-b border-line bg-sage-100 px-6 py-4 text-sm" aria-label="Avanzamento prenotazione" id="booking-progress">
+    {steps.map((s, i) => (
+      <li data-step-indicator={i + 1} class="flex items-center gap-2 rounded-full px-3 py-1 font-medium">
+        <span class="grid h-6 w-6 place-items-center rounded-full bg-white text-xs">{i + 1}</span>{s}
+      </li>
+    ))}
+  </ol>
+
+  <form id="booking-form" novalidate class="p-6 md:p-8">
+    <div id="booking-error" role="alert" tabindex="-1" hidden class="mb-5 rounded-xl border-2 border-alert bg-alert-bg p-4 font-medium text-alert"></div>
+
+    <section data-step="1" aria-labelledby="bk-h1">
+      <h2 id="bk-h1" class="!text-2xl" tabindex="-1">1. Scegli il servizio</h2>
+      <fieldset class="mt-5 grid gap-3">
+        <legend class="sr-only">Servizio</legend>
+        {bookingServices.map((s) => (
+          <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-line p-4 has-[:checked]:border-teal-600 has-[:checked]:bg-sage-100">
+            <input type="radio" name="service" value={s.id} class="h-5 w-5" checked={s.id === presetService} />
+            <span>{s.label} <span class="text-sm text-slate-600">· circa {s.minutes} min</span></span>
+          </label>
+        ))}
+      </fieldset>
+    </section>
+
+    <section data-step="2" aria-labelledby="bk-h2" hidden>
+      <h2 id="bk-h2" class="!text-2xl" tabindex="-1">2. Modalità della seduta</h2>
+      <fieldset class="mt-5 grid gap-3 sm:grid-cols-2">
+        <legend class="sr-only">Modalità</legend>
+        <label class="flex min-h-14 cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-[:checked]:border-teal-600 has-[:checked]:bg-sage-100">
+          <input type="radio" name="format" value="studio" class="mt-1 h-5 w-5" />
+          <span><strong>In studio</strong><br /><span class="text-sm text-slate-600">{site.address.street}, {site.address.city} ({site.address.province})</span></span>
+        </label>
+        <label class="flex min-h-14 cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-[:checked]:border-teal-600 has-[:checked]:bg-sage-100">
+          <input type="radio" name="format" value="online" class="mt-1 h-5 w-5" />
+          <span><strong>Online</strong><br /><span class="text-sm text-slate-600">Videoconsulenza: il link ti viene inviato via email</span></span>
+        </label>
+      </fieldset>
+    </section>
+
+    <section data-step="3" aria-labelledby="bk-h3" hidden>
+      <h2 id="bk-h3" class="!text-2xl" tabindex="-1">3. Scegli il professionista</h2>
+      <fieldset class="mt-5 grid gap-3">
+        <legend class="sr-only">Professionista</legend>
+        <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-line p-4 has-[:checked]:border-teal-600 has-[:checked]:bg-sage-100">
+          <input type="radio" name="professional" value="any" class="h-5 w-5" checked />
+          <span><strong>Primo disponibile</strong></span>
+        </label>
+        {Object.values(professionals).map((p) => (
+          <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-line p-4 has-[:checked]:border-teal-600 has-[:checked]:bg-sage-100">
+            <input type="radio" name="professional" value={p.id} class="h-5 w-5" />
+            <span><strong>{p.name}</strong><br /><span class="text-sm text-slate-600">{p.title}</span></span>
+          </label>
+        ))}
+      </fieldset>
+    </section>
+
+    <section data-step="4" aria-labelledby="bk-h4" hidden>
+      <h2 id="bk-h4" class="!text-2xl" tabindex="-1">4. Scegli data e orario</h2>
+      <div class="mt-5 grid gap-8 md:grid-cols-[minmax(0,22rem)_1fr]">
+        <div>
+          <div class="mb-3 flex items-center justify-between">
+            <button type="button" id="cal-prev" class="btn btn-secondary !min-h-11 !px-4 !py-1" aria-label="Mese precedente">←</button>
+            <p id="cal-title" class="font-serif text-lg font-semibold" aria-live="polite"></p>
+            <button type="button" id="cal-next" class="btn btn-secondary !min-h-11 !px-4 !py-1" aria-label="Mese successivo">→</button>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase text-slate-600" aria-hidden="true">
+            <span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
+          </div>
+          <div id="cal-grid" class="mt-1 grid grid-cols-7 gap-1" role="group" aria-labelledby="cal-title"></div>
+          <p class="hint">I giorni disponibili sono selezionabili.</p>
+        </div>
+        <div>
+          <p id="slots-title" class="font-semibold">Seleziona prima un giorno.</p>
+          <div id="slots" class="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-labelledby="slots-title"></div>
+        </div>
+      </div>
+    </section>
+
+    <section data-step="5" aria-labelledby="bk-h5" hidden>
+      <h2 id="bk-h5" class="!text-2xl" tabindex="-1">5. I tuoi dati</h2>
+      <p id="bk-summary" class="mt-3 rounded-xl bg-sage-100 p-4 font-medium"></p>
+      <div class="mt-5 grid gap-5 sm:grid-cols-2">
+        <div class="field"><label for="b-name">Nome e cognome *</label><input id="b-name" name="name" class="input" autocomplete="name" required /><p id="b-name-err" class="field-error" hidden></p></div>
+        <div class="field"><label for="b-email">Email *</label><input id="b-email" name="email" type="email" class="input" autocomplete="email" required /><p id="b-email-err" class="field-error" hidden></p></div>
+        <div class="field sm:col-span-2"><label for="b-phone">Telefono *</label><input id="b-phone" name="phone" type="tel" class="input" autocomplete="tel" required /><p id="b-phone-err" class="field-error" hidden></p></div>
+      </div>
+      <div class="field mt-5">
+        <label for="b-note">Motivo della richiesta (breve, non diagnostico)</label>
+        <textarea id="b-note" name="note" rows="3" maxlength="600" class="input" aria-describedby="b-note-hint"></textarea>
+        <p id="b-note-hint" class="hint">Facoltativo. Non inserire dati clinici dettagliati: ne parleremo in colloquio.</p>
+        <p id="b-note-err" class="field-error" hidden></p>
+      </div>
+      <div aria-hidden="true" style="position:absolute;left:-9999px"><label>Sito web <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+      <div class="mt-5 space-y-3">
+        <label class="flex items-start gap-3"><input type="checkbox" name="policy" class="mt-1.5 h-5 w-5" />
+          <span>Ho letto e accetto le condizioni: disdetta con almeno 24 ore di anticipo; le sedute online avvengono in un luogo riservato e con connessione stabile (telepsicologia); la prenotazione è valida dopo conferma dello studio. *</span></label>
+        <p id="b-policy-err" class="field-error" hidden></p>
+        <label class="flex items-start gap-3"><input type="checkbox" name="consent" class="mt-1.5 h-5 w-5" />
+          <span>Ho letto l’<a href="/privacy" target="_blank">Informativa Privacy</a> e acconsento al trattamento dei miei dati per gestire la prenotazione. *</span></label>
+        <p id="b-consent-err" class="field-error" hidden></p>
+      </div>
+    </section>
+
+    <div class="mt-8 flex flex-wrap justify-between gap-3" id="booking-nav">
+      <button type="button" id="bk-back" class="btn btn-secondary" hidden>Indietro</button>
+      <button type="button" id="bk-next" class="btn btn-primary ml-auto">Avanti</button>
+      <button type="submit" id="bk-submit" class="btn btn-primary ml-auto" hidden>Invia richiesta di prenotazione</button>
+    </div>
+  </form>
+
+  <div id="booking-done" role="status" tabindex="-1" hidden class="p-6 md:p-8">
+    <h2 class="!text-2xl">Richiesta inviata</h2>
+    <div id="done-body" class="mt-4 space-y-3"></div>
+    <p class="mt-4 text-sm text-slate-600">Lo studio confermerà l’appuntamento via email o telefono. Per urgenze cliniche non utilizzare questo servizio: chiama il 112.</p>
+    <button type="button" class="btn btn-secondary mt-5" id="bk-restart">Nuova prenotazione</button>
+  </div>
+</div>
+
+<script>
+  import { validateBooking, type BookingPayload } from '../lib/validation';
+  import { postJson, mailtoHref } from '../lib/submit';
+  import { site } from '../config/site';
+
+  type Avail = Record<string, Record<string, string[]>>;
+  const root = document.getElementById('booking') as HTMLElement;
+  const form = document.getElementById('booking-form') as HTMLFormElement;
+  const avail: Avail = JSON.parse(root.dataset.availability!);
+  const services: { id: string; label: string; minutes: number }[] = JSON.parse(root.dataset.services!);
+  const names: Record<string, string> = JSON.parse(root.dataset.professionals!);
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  const state = { step: 1, month: new Date(), date: '', time: '', resolvedPro: '' };
+  state.month.setDate(1);
+  const TOTAL = 5;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const iso = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
+  const val = (name: string) => (form.elements.namedItem(name) as RadioNodeList | HTMLInputElement)?.value ?? '';
+  const todayISO = () => { const t = new Date(); return iso(t.getFullYear(), t.getMonth(), t.getDate()); };
+  const fmtDate = (s: string) => new Date(s + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  /** Times available for a date given the chosen professional (or union for "any"). */
+  function slotsFor(date: string): { time: string; pro: string }[] {
+    const pro = val('professional');
+    const out = new Map<string, string>();
+    for (const id of pro === 'any' ? Object.keys(avail) : [pro]) {
+      for (const t of avail[id]?.[date] ?? []) if (!out.has(t)) out.set(t, id);
+    }
+    return [...out].map(([time, p]) => ({ time, pro: p })).sort((a, b) => a.time.localeCompare(b.time));
+  }
+  const hasSlots = (date: string) => date > todayISO() && slotsFor(date).length > 0;
+
+  function renderCalendar() {
+    const y = state.month.getFullYear(), m = state.month.getMonth();
+    $('cal-title').textContent = state.month.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    const first = (new Date(y, m, 1).getDay() + 6) % 7; // Monday first
+    const days = new Date(y, m + 1, 0).getDate();
+    const grid = $('cal-grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < first; i++) grid.append(document.createElement('span'));
+    for (let d = 1; d <= days; d++) {
+      const date = iso(y, m, d);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = String(d);
+      const ok = hasSlots(date);
+      b.disabled = !ok;
+      b.setAttribute('aria-label', `${fmtDate(date)}${ok ? '' : ', non disponibile'}`);
+      b.setAttribute('aria-pressed', String(state.date === date));
+      b.className = 'min-h-11 rounded-lg text-base font-medium ' + (state.date === date ? 'bg-navy-800 text-white' : ok ? 'bg-sage-100 hover:bg-sage-200' : 'text-slate-400');
+      b.addEventListener('click', () => { state.date = date; state.time = ''; renderCalendar(); renderSlots(); });
+      grid.append(b);
+    }
+    ($('cal-prev') as HTMLButtonElement).disabled = state.month <= new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  }
+
+  function renderSlots() {
+    const box = $('slots');
+    box.innerHTML = '';
+    if (!state.date) { $('slots-title').textContent = 'Seleziona prima un giorno.'; return; }
+    $('slots-title').textContent = `Orari disponibili — ${fmtDate(state.date)}`;
+    for (const s of slotsFor(state.date)) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(state.time === s.time));
+      b.textContent = s.time;
+      b.className = 'min-h-11 min-w-20 rounded-full border-2 px-4 font-semibold ' + (state.time === s.time ? 'border-navy-800 bg-navy-800 text-white' : 'border-teal-600 text-teal-700 hover:bg-sage-100');
+      b.addEventListener('click', () => { state.time = s.time; state.resolvedPro = s.pro; renderSlots(); });
+      box.append(b);
+    }
+  }
+
+  function summaryText() {
+    const svc = services.find((s) => s.id === val('service'));
+    const pro = val('professional') === 'any' ? state.resolvedPro : val('professional');
+    return `${svc?.label} · ${val('format') === 'online' ? 'Online' : 'In studio — Cremenaga (VA)'} · ${names[pro]} · ${fmtDate(state.date)} alle ${state.time}`;
+  }
+
+  function showError(msg: string) {
+    const el = $('booking-error');
+    el.textContent = msg; el.hidden = !msg;
+    if (msg) el.focus();
+  }
+
+  function go(step: number, focus = true) {
+    state.step = step;
+    form.querySelectorAll<HTMLElement>('[data-step]').forEach((s) => (s.hidden = Number(s.dataset.step) !== step));
+    document.querySelectorAll<HTMLElement>('[data-step-indicator]').forEach((li) => {
+      const n = Number(li.dataset.stepIndicator);
+      li.className = 'flex items-center gap-2 rounded-full px-3 py-1 font-medium ' + (n === step ? 'bg-navy-800 text-white' : n < step ? 'text-teal-700' : 'text-slate-600');
+      n === step ? li.setAttribute('aria-current', 'step') : li.removeAttribute('aria-current');
+    });
+    $('bk-back').hidden = step === 1;
+    $('bk-next').hidden = step === TOTAL;
+    $('bk-submit').hidden = step !== TOTAL;
+    if (step === 4) {
+      // jump to the month of the first available day
+      if (!state.date) {
+        const first = Object.keys(avail).flatMap((id) => (val('professional') === 'any' || val('professional') === id ? Object.keys(avail[id]) : [])).filter(hasSlots).sort()[0];
+        if (first) state.month = new Date(Number(first.slice(0, 4)), Number(first.slice(5, 7)) - 1, 1);
+      }
+      renderCalendar(); renderSlots();
+    }
+    if (step === 5) $('bk-summary').textContent = summaryText();
+    showError('');
+    if (focus) form.querySelector<HTMLElement>(`[data-step="${step}"] h2`)?.focus();
+  }
+
+  const stepErrors: Record<number, () => string> = {
+    1: () => (val('service') ? '' : 'Seleziona un servizio per continuare.'),
+    2: () => (val('format') ? '' : 'Seleziona la modalità della seduta.'),
+    3: () => (val('professional') ? '' : 'Seleziona un professionista.'),
+    4: () => (state.date && state.time ? '' : 'Seleziona un giorno e un orario.'),
+  };
+
+  $('bk-next').addEventListener('click', () => {
+    const err = stepErrors[state.step]?.() ?? '';
+    if (err) return showError(err);
+    if (state.step === 3) { state.date = ''; state.time = ''; }
+    go(state.step + 1);
+  });
+  $('bk-back').addEventListener('click', () => go(state.step - 1));
+  form.addEventListener('change', (e) => {
+    if ((e.target as HTMLInputElement).name === 'professional') { state.date = ''; state.time = ''; }
+  });
+  $('cal-prev').addEventListener('click', () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() - 1, 1); renderCalendar(); });
+  $('cal-next').addEventListener('click', () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 1); renderCalendar(); });
+
+  const errId: Record<string, string> = { name: 'b-name', email: 'b-email', phone: 'b-phone', note: 'b-note', policy: 'b-policy', consent: 'b-consent' };
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = new FormData(form);
+    const pro = (val('professional') === 'any' ? state.resolvedPro : val('professional')) as BookingPayload['professional'];
+    const payload: BookingPayload = {
+      service: val('service'), format: val('format') as BookingPayload['format'], professional: pro,
+      date: state.date, time: state.time, name: String(d.get('name') || ''), email: String(d.get('email') || ''),
+      phone: String(d.get('phone') || ''), note: String(d.get('note') || ''), consent: d.has('consent'), policy: d.has('policy'),
+      website: String(d.get('website') || ''),
+    };
+    const errors = validateBooking(payload);
+    form.querySelectorAll<HTMLElement>('.field-error').forEach((el) => { el.hidden = true; });
+    form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    const keys = Object.keys(errors) as (keyof typeof errors)[];
+    if (keys.length) {
+      for (const k of keys) {
+        const el = document.getElementById(`${errId[k]}-err`);
+        if (el) { el.textContent = errors[k]!; el.hidden = false; }
+        form.querySelector(`[name="${k}"]`)?.setAttribute('aria-invalid', 'true');
+      }
+      showError('Controlla i campi evidenziati.');
+      form.querySelector<HTMLElement>(`[name="${keys[0]}"]`)?.focus();
+      return;
+    }
+    if (payload.website) return;
+    const btn = $('bk-submit') as HTMLButtonElement;
+    btn.disabled = true; btn.textContent = 'Invio in corso…';
+    const res = await postJson(root.dataset.endpoint!, payload);
+    btn.disabled = false; btn.textContent = 'Invia richiesta di prenotazione';
+
+    const body = $('done-body');
+    body.innerHTML = '';
+    const p1 = document.createElement('p');
+    p1.className = 'rounded-xl bg-sage-100 p-4 font-medium';
+    p1.textContent = summaryText();
+    const p2 = document.createElement('p');
+    if (res.ok) {
+      p2.textContent = `Grazie ${payload.name}: abbiamo ricevuto la tua richiesta.`;
+    } else {
+      p2.innerHTML = 'Non è stato possibile inviare la richiesta online. Conferma la prenotazione scrivendoci: ';
+      const a = document.createElement('a');
+      a.href = mailtoHref(site.contact.email, 'Richiesta di prenotazione', `${summaryText()}\n\nNome: ${payload.name}\nTelefono: ${payload.phone}\nEmail: ${payload.email}\nNote: ${payload.note}`);
+      a.textContent = 'invia email';
+      p2.append(a, ` oppure chiama ${site.contact.phone}.`);
+    }
+    body.append(p1, p2);
+    form.hidden = true; $('booking-done').hidden = false; $('booking-done').focus();
+  });
+
+  $('bk-restart').addEventListener('click', () => {
+    form.reset(); state.date = ''; state.time = ''; form.hidden = false; $('booking-done').hidden = true; go(1);
+  });
+
+  // Preset from /prenota?servizio=...
+  const preset = new URLSearchParams(location.search).get('servizio') || root.dataset.preset;
+  if (preset && services.some((s) => s.id === preset)) {
+    (form.querySelector(`input[name=service][value="${preset}"]`) as HTMLInputElement | null)?.click();
+  }
+  const presetPro = new URLSearchParams(location.search).get('professional');
+  if (presetPro && names[presetPro]) {
+    (form.querySelector(`input[name=professional][value="${presetPro}"]`) as HTMLInputElement | null)?.click();
+  }
+  go(1, false);
+</script>

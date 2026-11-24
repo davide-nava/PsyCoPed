@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import BookingWidget from '../components/BookingWidget.astro';
+import EmergencyNotice from '../components/EmergencyNotice.astro';
+const crumbs = [{ name: 'Prenota', href: '/prenota' }];
+---
+
+<BaseLayout title="Prenota una seduta di psicologia" description="Prenota online una consulenza psicologica, neuropsicologica, pedagogica, di ipnosi o coaching a Cremenaga (VA) o in videochiamata." crumbs={crumbs}>
+  <PageHeader title="Prenota una seduta" lead="Scegli servizio, modalità, professionista e orario: ti confermeremo l’appuntamento." crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page max-w-4xl space-y-8">
+      <BookingWidget />
+      <EmergencyNotice />
+      <p>Preferisci parlarne prima? <a href="/contatti">Richiedi informazioni</a>.</p>
+    </div>
+  </section>
+</BaseLayout>

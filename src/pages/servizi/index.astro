@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import { services } from '../../data/services';
+const crumbs = [{ name: 'Servizi', href: '/servizi' }];
+---
+
+<BaseLayout
+  title="Servizi di psicologia e neuropsicologia"
+  description="Consulenza psicologica, valutazione neuropsicologica, pedagogia e DSA, ipnosi, professional coaching e percorso transpersonale. Cremenaga (VA) e online."
+  pageType="CollectionPage"
+  crumbs={crumbs}>
+  <PageHeader title="Servizi di sostegno psicologico" eyebrow="Al vostro fianco ad ogni passo" lead="Percorsi clinici, neuropsicologici, pedagogici e di crescita personale e professionale, in studio a Cremenaga o online." crumbs={crumbs} />
+  <section class="section">
+    <div class="container-page grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {services.map((s) => <ServiceCard service={s} />)}
+    </div>
+  </section>
+</BaseLayout>
