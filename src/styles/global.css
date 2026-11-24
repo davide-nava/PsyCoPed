@@ -58,3 +58,4 @@
 
 .skip-link { position: absolute; left: -999px; top: 0; z-index: 100; background: #fff; padding: .75rem 1rem; }
 .skip-link:focus { left: 1rem; top: 1rem; }
+footer a, address a , .text-decoration-none  { text-decoration: none !important;}

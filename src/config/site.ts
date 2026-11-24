@@ -20,9 +20,9 @@ export const site = {
     mapsUrl: 'https://www.google.com/maps/place/Studio+PsyCoPed/@45.9903585,8.7982417,17z/data=!3m1!4b1!4m6!3m5!1s0x4785d385ca4f0323:0x95115a496cfee1d4!8m2!3d45.9903548!4d8.8008166!16s%2Fg%2F11pzwfqq21?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D',
   },
   contact: {
-    phone: '+39 347 521 3108',
+    phone: '+393475213108',
     phoneRaw: '+393475213108',
-    email: 'mirko.provini@icloud.com',
+    email: 'info@studiopsycoped.com',
     pec: 'mirkoprovini.psycoped@pec.it',
   },
   // VERIFY: Partita IVA, codice fiscale, fee schedule, professional liability insurance

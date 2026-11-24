@@ -14,7 +14,7 @@ const year = new Date().getFullYear();
       <address class="mt-4 not-italic text-sage-200">
         {site.address.street}<br />
         {site.address.postalCode} {site.address.city} ({site.address.province})<br />
-        <a class="text-white" href={site.address.mapsUrl} rel="noopener noreferrer" target="_blank">{t.footer.mapsLink}<span class="sr-only">{t.common.newTab}</span></a>
+        <a class="text-white" href={site.address.mapsUrl} rel="noopener noreferrer" target="_blank">{t.footer.mapsLink}<span class="sr-only text-decoration-none">{t.common.newTab}</span></a>
       </address>
     </div>
     <div>
