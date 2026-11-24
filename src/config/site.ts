@@ -17,7 +17,7 @@ export const site = {
       it: 'Via Provinciale, 43 — 21030 Cremenaga (VA), Italia',
       en: 'Via Provinciale, 43 — 21030 Cremenaga (VA), Italy',
     },
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Via+Provinciale+43+21030+Cremenaga+VA',
+    mapsUrl: 'https://www.google.com/maps/place/Studio+PsyCoPed/@45.9903585,8.7982417,17z/data=!3m1!4b1!4m6!3m5!1s0x4785d385ca4f0323:0x95115a496cfee1d4!8m2!3d45.9903548!4d8.8008166!16s%2Fg%2F11pzwfqq21?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D',
   },
   contact: {
     phone: '+39 347 521 3108',
@@ -139,6 +139,5 @@ export const nav = [
   { href: '/servizi', key: 'services' },
   { href: '/come-funziona', key: 'how' },
   { href: '/pubblicazioni', key: 'publications' },
-  { href: '/vocal-coach', key: 'vocal' },
   { href: '/contatti', key: 'contact' },
 ] as const;

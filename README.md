@@ -27,7 +27,7 @@ npm run build    # static site in dist/
 
 Every route also exists under `/en` (pages live in `src/pages/[...lang]/`; slugs are shared between languages). The header switcher links to the same page in the other language. To add copy, add the key to `it.ts` and `en.ts`; `npm run test:i18n` (run in CI) and `npm run check` fail if the two diverge. Long legal pages (privacy, cookie, note legali) and a few rich-text paragraphs are written inline per language in the page files.
 
-Routes: `/`, `/chi-sono`, `/servizi`, `/servizi/[slug]`, `/come-funziona`, `/prenota`, `/contatti`, `/pubblicazioni`, `/interviste`, `/vocal-coach`, `/privacy`, `/cookie`, `/note-legali`.
+Routes: `/`, `/chi-sono`, `/servizi`, `/servizi/[slug]`, `/come-funziona`, `/prenota`, `/contatti`, `/pubblicazioni`, `/interviste`, `/privacy`, `/cookie`, `/note-legali`.
 
 ## Connecting the backends
 
@@ -41,7 +41,7 @@ Routes: `/`, `/chi-sono`, `/servizi`, `/servizi/[slug]`, `/come-funziona`, `/pre
 2. **Partita IVA, codice fiscale**, fee schedule, professional liability insurance (`site.ts`, `/note-legali`).
 3. Dott.ssa Coccia's Albo registration number and bio details (only title and phone were available).
 4. Opening hours, session durations, cancellation policy (24 h is a sample), real availability.
-5. Legacy content still to migrate: publications, interviews, Vocal Coach bio (ENG), videos, discography, music projects (`src/data/content.ts`). The legacy sites were not scraped; content came from the project brief.
+5. Legacy content still to migrate: publications, interviews, videos, discography, music projects (`src/data/content.ts`). The legacy sites were not scraped; content came from the project brief.
 6. Privacy / Cookie / Note legali are **drafts**: have them reviewed by legal counsel / DPO; list actual processors; remove `DraftBanner`.
 7. Telepsychology consent wording and the video-call provider.
 8. Add real photos, OG image, and test with a screen reader and Lighthouse.
