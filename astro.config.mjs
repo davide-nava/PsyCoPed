@@ -3,8 +3,8 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
-const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://davide-nava.github.io').replace(/\/+$/, '');
-const rawBase = process.env.PUBLIC_BASE_PATH || '/PsyCoPed/';
+const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://www.studiopsycoped.com').replace(/\/+$/, '');
+const rawBase = process.env.PUBLIC_BASE_PATH || '/';
 const normalizedBase = `/${rawBase.replace(/^\/+|\/+$/g, '')}/`.replace(/^\/\/$/, '/');
 const rootUrl = `${siteUrl}${normalizedBase}`;
 
@@ -48,7 +48,7 @@ export default defineConfig({
         }
 
         if (
-          /\/(servizi|chi-siamo|prenota|contatti|faq|services|about|book|contact)\/$/.test(url)
+          /\/(servizi|chi-siamo|chi-sono|prenota|contatti|faq|services|about|book|contact)\/$/.test(url)
         ) {
           return {
             ...item,

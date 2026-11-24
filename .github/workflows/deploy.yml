@@ -48,13 +48,15 @@ jobs:
 
       - name: Build Astro SSG
         env:
-          PUBLIC_SITE_URL: 'https://davide-nava.github.io'
-          PUBLIC_BASE_PATH: '/PsyCoPed/'
+          PUBLIC_SITE_URL: 'https://www.studiopsycoped.com'
+          PUBLIC_BASE_PATH: '/'
         run: npm run build
 
       - name: Ensure .nojekyll Exists in Dist
         if: github.ref == 'refs/heads/main'
-        run: touch ./dist/.nojekyll
+        run: |
+          touch ./dist/.nojekyll
+          if [ -f public/CNAME ]; then cp public/CNAME ./dist/CNAME; fi
 
       - name: Upload GitHub Pages Artifact
         if: github.ref == 'refs/heads/main'

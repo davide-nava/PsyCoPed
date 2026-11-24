@@ -6,7 +6,7 @@ import type { Locale } from '../i18n';
  */
 export const site = {
   name: 'Studio PsyCoPed',
-  url: 'https://davide-nava.github.io/PsyCoPed/', // fallback only: the deployed origin comes from `site` in astro.config.mjs
+  url: 'https://www.studiopsycoped.com/', // fallback only: the deployed origin comes from `site` in astro.config.mjs
   address: {
     street: 'Via Provinciale, 43',
     postalCode: '21030',

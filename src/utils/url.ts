@@ -1,5 +1,5 @@
 /**
- * URL helpers for a site deployed under a sub-path (GitHub Pages: `/PsyCoPed/`).
+ * URL helpers. The site is served from the domain root (`/`) on www.studiopsycoped.com; a sub-path base still works if BASE_URL is overridden.
  * Every internal link and public asset must go through these helpers.
  */
 import { localizedRoutes } from '../i18n/routes.ts';

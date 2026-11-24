@@ -65,3 +65,21 @@ const feed = parseOccupiedFeed([{ professional: 'provini', date: '2026-12-01', t
 assert.equal(feed.length, 1, 'feed validation drops malformed entries');
 assert.ok(!getAvailableSlotsForDate('2026-12-01', { professional: 'provini', now, extraOccupied: feed }).some((s) => s.time === dec1[0].time), 'feed slot merged');
 console.log('agenda checks passed.');
+
+// Root base ('/'): no double slashes, same behaviour as a sub-path.
+const R = '/';
+assert.equal(joinBase(R, '/'), '/');
+assert.equal(joinBase(R, '/prenota'), '/prenota/');
+assert.equal(joinBase(R, 'prenota//x'), '/prenota/x/');
+assert.equal(joinBase(R, '/en'), '/en/');
+assert.equal(joinBase(R, '/richiesta.ics'), '/richiesta.ics');
+assert.equal(joinAsset(R, '/favicon.svg'), '/favicon.svg');
+assert.equal(joinAsset(R, 'og-image.png'), '/og-image.png');
+assert.equal(stripBase(R, '/en/book/'), '/en/book/');
+assert.equal(switchLocalePathFor(R, '/', 'en'), '/en/');
+assert.equal(switchLocalePathFor(R, '/en/', 'it'), '/');
+assert.equal(switchLocalePathFor(R, '/prenota/', 'en'), '/en/book/');
+assert.equal(isActivePathFor(R, '/', '/'), true);
+assert.equal(isActivePathFor(R, '/servizi/ipnosi/', '/'), false);
+assert.equal(isActivePathFor(R, '/servizi/ipnosi/', '/servizi/'), true);
+console.log('root-base url checks passed.');
